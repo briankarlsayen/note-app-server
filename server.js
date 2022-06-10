@@ -1,9 +1,11 @@
 const express = require('express');
 const app = express();
+const cors = require("cors")
 require("dotenv").config();
 const PORT = process.env.PORT || 5632
 const { sequelize, Note, Item } = require('./models')
 
+app.use(cors())
 app.use(express.json())
 app.get('/', (req, res) => {
   res.send('Routes alive')
@@ -117,4 +119,6 @@ app.put('/items/edit/:uuid', async(req, res) => {
 
 app.listen(PORT, async() => {
   console.log(`Listening to port ${PORT}`)
+  await sequelize.authenticate();
+  console.log('Connected to database')
 })
