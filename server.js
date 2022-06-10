@@ -118,9 +118,10 @@ app.put('/items/edit/:uuid', async(req, res) => {
 })
 
 app.get('/items/getbynote/:id', async(req, res) => {
-  const noteId = req.params.id
+  const noteUuid = req.params.id
   try {
-    const item = await Item.findAll({where: { noteId, isDeleted: false }})
+    const note = await Note.findOne({ where: {uuid: noteUuid } })
+    const item = await Item.findAll({where: { noteId: note.id, isDeleted: false }})
     res.status(201).json(item)
   } catch(err) {
     res.status(422).json({message: "error: ", err})
