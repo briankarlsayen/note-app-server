@@ -40,7 +40,7 @@ app.get('/notes/:uuid', async(req, res) => {
   }
 })
 
-app.put('/notes/:uuid', async(req, res) => {
+app.put('/notes/edit/:uuid', async(req, res) => {
   const uuid = req.params.uuid;
   const { title, description, body } = req.body;
   try {
@@ -112,6 +112,16 @@ app.put('/items/edit/:uuid', async(req, res) => {
     item.type = type;
     item.save()
     res.status(201).json({message: "Item successfully updated", item})
+  } catch(err) {
+    res.status(422).json({message: "error: ", err})
+  }
+})
+
+app.get('/items/getbynote/:id', async(req, res) => {
+  const noteId = req.params.id
+  try {
+    const item = await Item.findAll({where: { noteId, isDeleted: false }})
+    res.status(201).json(item)
   } catch(err) {
     res.status(422).json({message: "error: ", err})
   }
