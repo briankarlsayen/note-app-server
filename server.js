@@ -93,7 +93,7 @@ app.get('/items', async(req, res) => {
 app.put('/items/delete/:uuid', async(req, res) => {
   const uuid = req.params.uuid
   try {
-    const item = await Item.findOne({ uuid })
+    const item = await Item.findOne({ where: { uuid } })
     item.isDeleted = true;
     item.save()
     res.status(201).json({message: "Item successfully deleted", item})
@@ -106,7 +106,7 @@ app.put('/items/edit/:uuid', async(req, res) => {
   const uuid = req.params.uuid
   const { title, body, type } = req.body
   try {
-    const item = await Item.findOne({ uuid })
+    const item = await Item.findOne({ where: { uuid } })
     item.title = title;
     item.body = body;
     item.type = type;
@@ -120,7 +120,7 @@ app.put('/items/edit/:uuid', async(req, res) => {
 app.put('/items/editcheck/:uuid', async(req, res) => {
   const uuid = req.params.uuid
   try {
-    const item = await Item.findOne({ uuid })
+    const item = await Item.findOne({ where: { uuid } })
     item.checked = !item.checked;
     item.save()
     res.status(201).json({message: "Item successfully updated", item})
