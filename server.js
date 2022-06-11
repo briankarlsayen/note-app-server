@@ -121,7 +121,7 @@ app.put('/items/editcheck/:uuid', async(req, res) => {
   const uuid = req.params.uuid
   try {
     const item = await Item.findOne({ uuid })
-    item.check = !item.check;
+    item.checked = !item.checked;
     item.save()
     res.status(201).json({message: "Item successfully updated", item})
   } catch(err) {
