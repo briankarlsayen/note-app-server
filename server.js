@@ -23,7 +23,11 @@ app.post('/notes', async(req, res) => {
 
 app.get('/notes', async(req, res) => {
   try {
-    const note = await Note.findAll({ where: { isDeleted: false }});
+    const note = await Note.findAll({ where: { isDeleted: false }, 
+    order: [
+      ['id', 'ASC'],
+      ['title', 'ASC'],
+    ]});
     res.status(201).json(note)
   } catch(err) {
     res.status(422).json({message: "error: ", err})
@@ -42,6 +46,7 @@ app.get('/notes/:uuid', async(req, res) => {
 
 app.put('/notes/edit/:uuid', async(req, res) => {
   const uuid = req.params.uuid;
+  console.log('uuid', uuid)
   const { title, description, body } = req.body;
   try {
     const note = await Note.findOne({ where: { uuid }});
@@ -83,7 +88,11 @@ app.post('/items', async(req, res) => {
 
 app.get('/items', async(req, res) => {
   try {
-    const item = await Item.findAll({ where: {isDeleted: false}, include: 'note'})
+    const item = await Item.findAll({ where: {isDeleted: false}, include: 'note', 
+    order: [
+      ['id', 'ASC'],
+      ['title', 'ASC'],
+    ]})
     res.status(201).json(item)
   } catch(err) {
     res.status(422).json({message: "error: ", err})
@@ -93,7 +102,7 @@ app.get('/items', async(req, res) => {
 app.put('/items/delete/:uuid', async(req, res) => {
   const uuid = req.params.uuid
   try {
-    const item = await Item.findOne({ uuid })
+    const item = await Item.findOne({ where: { uuid } })
     item.isDeleted = true;
     item.save()
     res.status(201).json({message: "Item successfully deleted", item})
@@ -106,7 +115,7 @@ app.put('/items/edit/:uuid', async(req, res) => {
   const uuid = req.params.uuid
   const { title, body, type } = req.body
   try {
-    const item = await Item.findOne({ uuid })
+    const item = await Item.findOne({ where: { uuid } })
     item.title = title;
     item.body = body;
     item.type = type;
@@ -120,7 +129,7 @@ app.put('/items/edit/:uuid', async(req, res) => {
 app.put('/items/editcheck/:uuid', async(req, res) => {
   const uuid = req.params.uuid
   try {
-    const item = await Item.findOne({ uuid })
+    const item = await Item.findOne({ where: { uuid } })
     item.check = !item.check;
     item.save()
     res.status(201).json({message: "Item successfully updated", item})
