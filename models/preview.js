@@ -3,22 +3,21 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class Item extends Model {
+  class Preview extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
-    static associate({ Note, Preview }) {
+    static associate({ Item }) {
       // define association here
-      this.belongsTo(Note, { foreignKey: 'noteId', as: 'note' })
-      this.hasOne(Preview, { foreignKey: 'itemId', as: 'preview' })
+      this.belongsTo(Item, { foreignKey: 'itemId', as: 'item' })
     }
     toJSON() {
-      return { ...this.get(), id: undefined, noteId: undefined}
+      return { ...this.get(), id: undefined, itemId: undefined}
     }
   }
-  Item.init({
+  Preview.init({
     uuid: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4
@@ -27,26 +26,25 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    body: {
+    title: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    checked: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: 0,
+    description: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     type: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    isDeleted: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: 0,
+    image: {
+      type: DataTypes.BLOB,
+      allowNull: false,
     },
   }, {
     sequelize,
-    tableName: "items",
-    modelName: 'Item',
+    modelName: 'Preview',
   });
-  return Item;
+  return Preview;
 };
