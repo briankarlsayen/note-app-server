@@ -1,7 +1,7 @@
 'use strict';
 module.exports = {
   async up(queryInterface, DataTypes) {
-    await queryInterface.createTable('Previews', {
+    await queryInterface.createTable('previews', {
       uuid: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4
@@ -43,6 +43,6 @@ module.exports = {
     });
   },
   async down(queryInterface, DataTypes) {
-    await queryInterface.dropTable('Previews');
+    await queryInterface.dropTable('previews');
   }
 };

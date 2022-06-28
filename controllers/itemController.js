@@ -26,7 +26,7 @@ exports.getItemsByNoteId = async (req, res, next) => {
   const noteUuid = req.params.id
   try {
     const note = await Note.findOne({ where: {uuid: noteUuid } })
-    const item = await Item.findAll({where: { noteId: note.id, isDeleted: false }, 
+    const item = await Item.findAll({where: { noteId: note.id, isDeleted: false }, include: 'preview', 
       order: [
         ['id', 'ASC'],
         ['title', 'ASC'],
