@@ -1,11 +1,49 @@
-const { Item, Note } = require('../models')
+const { Item, Note, Preview } = require('../models')
+const { createSnapshot } = require("../utilities/snapshot")
+const fs = require('fs');
+const path =require('path');
+const mime = require('mime');
 
 exports.createItem = async (req, res, next) => {
   const { noteUuid, title, body, type, } = req.body;
   try {
     const note = await Note.findOne({ where: {uuid: noteUuid } })
     const item = await Item.create({title, body, type, noteId: note.id, checked: 0, isDeleted: 0});
-    res.status(201).json({message: "Successfully created", item})
+    if(type === "Bookmark") {
+      const snapshot = await createSnapshot({ url: title })
+      console.log('snapshot', snapshot)
+      if(snapshot && snapshot.success) {
+        const imgPath = './uploads/example.png'
+        const fileType = mime.getType(imgPath); 
+        const fileName = path.parse(imgPath).name;
+        fs.readFile(imgPath, async(err, data)=>{
+          if(err) {
+            throw err;
+          }
+          console.log('data', data)
+          const params = {
+            title: snapshot.pageTitle ? snapshot.pageTitle : title, 
+            description: snapshot.pageDescription ? snapshot.pageDescription : title, 
+            // type: fileType, 
+            type: snapshot.pageImage ? "url" : fileType, 
+            image: snapshot.pageImage ? "" : data, 
+            imageUrl: snapshot.pageImage ? snapshot.pageImage : "",
+            itemId: item.id
+          }
+          const preview = await Preview.create(params);
+          return res.status(201).json({message: "Successfully created", item: {
+            ...item.dataValues,
+            preview
+          }})
+        })
+      } else {
+        return res.status(201).json({message: "Unable to create snapshot", item})
+      }
+    } else if(type === "Text") {
+      res.status(201).json({message: "Successfully created", item})
+    } else {
+      res.status(422).json({message: "Invalid item type"})
+    }
   } catch(error) {
     return res.status(422).json({message: "error: ", error})
   }

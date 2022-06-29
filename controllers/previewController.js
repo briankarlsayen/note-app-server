@@ -54,26 +54,24 @@ exports.createPreviewBySnapshot = async (req, res, next) => {
       const imgPath = './uploads/example.png'
       const fileType = mime.getType(imgPath); 
       const fileName = path.parse(imgPath).name;
-      let data;
       fs.readFile(imgPath, async(err, data)=>{
         if(err) {
           throw err;
         }
-        data = data;
-        
-      })
-      if(data) {
         const params = {
-          title: fileName, description: "yeah", type: fileType, image: data, itemId: item.id
+          title: snapshot.pageTitle ? snapshot.pageTitle : fileName, 
+          description: snapshot.pageDescription ? snapshot.pageDescription : fileName, 
+          type: fileType, 
+          image: data, 
+          itemId: item.id
         }
         const preview = await Preview.create(params);
         return res.status(201).json({message: "Successfully created", preview})
-      }
+      })
       
+    } else {
+      return res.status(422).json({message: "Unable to create snapshot"})
     }
-    
-    return res.status(422).json({message: "Unable to create snapshot"})
-    
   } catch(error) {
     return res.status(422).json({message: "error: ", error})
   }
