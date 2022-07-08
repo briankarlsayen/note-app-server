@@ -1,4 +1,5 @@
 const { Item, Note, Preview } = require('../models')
+const { Op } = require("sequelize");
 const { createSnapshot } = require("../utilities/snapshot")
 const fs = require('fs');
 const path =require('path');
@@ -8,7 +9,8 @@ exports.createItem = async (req, res, next) => {
   const { noteUuid, title, body, type, } = req.body;
   try {
     const note = await Note.findOne({ where: {uuid: noteUuid } })
-    const item = await Item.create({title, body, type, noteId: note.id, checked: 0, isDeleted: 0});
+    const countCol = await Item.count()
+    const item = await Item.create({title, body, type, noteId: note.id, checked: 0, refId: countCol + 1, isDeleted: 0});
     if(type === "Bookmark") {
       const snapshot = await createSnapshot({ url: title })
       console.log('snapshot', snapshot)
@@ -52,7 +54,7 @@ exports.getItems = async (req, res, next) => {
   try {
     const item = await Item.findAll({ where: {isDeleted: false}, include: 'note', 
     order: [
-      ['id', 'ASC'],
+      ['refId', 'ASC'],
       ['title', 'ASC'],
     ]})
     res.status(201).json(item)
@@ -66,7 +68,7 @@ exports.getItemsByNoteId = async (req, res, next) => {
     const note = await Note.findOne({ where: {uuid: noteUuid } })
     const item = await Item.findAll({where: { noteId: note.id, isDeleted: false }, include: 'preview', 
       order: [
-        ['id', 'ASC'],
+        ['refId', 'ASC'],
         ['title', 'ASC'],
     ]})
     res.status(201).json(item)
@@ -106,6 +108,53 @@ exports.archiveItem = async (req, res, next) => {
     item.isDeleted = true;
     item.save()
     res.status(201).json({message: "Item successfully deleted", item})
+  } catch(error) {
+    return res.status(422).json({message: "error: ", error})
+  }
+}
+
+exports.updateItemPosition = async (req, res, next) => {
+  const { refUuid } = req.body
+  const uuid = req.params.uuid;
+  try {
+    const item = await Item.findOne({ where: { uuid }});
+    if(!item) return res.status(422).json({message: "Unable to find item"})
+
+    const refNote = refUuid ? await Item.findOne({ where: { uuid: refUuid }, isDeleted: false}) : null;
+    const refId = refNote ? refNote.refId : null;
+    
+    let itemPosition = refId ? "mid" : "bot";
+    const upperMost = await Item.max('refId')
+    if(Number(refId) === Number(upperMost)) itemPosition = "top";
+
+    let subtractIds = 0;
+    let upperId = 0;
+    let newId = 0;
+    
+    switch(itemPosition){
+      case "top":
+        upperId = Math.floor(refId) + 1;
+        subtractIds = upperId - refId;
+        newId = Number(subtractIds) / 2 + Number(refId);
+        break;
+      case "mid":
+        upperId = await Item.min('refId', { where: { refId: { [Op.gt]: refId }, isDeleted: false}})
+        subtractIds = upperId - refId;
+        let divideNums = Number(subtractIds) / 2
+        newId = Number(divideNums) + Number(refId);
+        break;
+      case "bot":
+        upperId = await Item.min('refId')
+        newId = Number(upperId) / 2;
+        break;
+      default: 
+        return res.status(422).json({message: "Unable to move item to location"})
+    }
+   
+    item.refId = newId;
+    item.save();
+
+    res.status(201).json({message: "Successfully update", data: item})
   } catch(error) {
     return res.status(422).json({message: "error: ", error})
   }

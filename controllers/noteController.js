@@ -4,8 +4,8 @@ const { Op } = require("sequelize");
 exports.createNote = async (req, res, next) => {
   const { title, description, body } = req.body;
   try {
-    const countNote = await Note.count()
-    const note = await Note.create({ title, description, body, refId: countNote + 1 });
+    const countCol = await Note.count()
+    const note = await Note.create({ title, description, body, refId: countCol + 1 });
     res.status(201).json({message: "Successfully created", note})
   } catch(error) {
     return res.status(422).json({message: "error: ", error})
@@ -80,24 +80,24 @@ exports.updateNotePosition = async (req, res, next) => {
     if(Number(refId) === Number(upperMost)) notePosition = "top";
 
     let subtractIds = 0;
-    let upperNote = 0;
+    let upperId = 0;
     let newId = 0;
 
     switch(notePosition){
       case "top":
-        upperNote = Math.floor(refId) + 1;
-        subtractIds = upperNote - refId;
+        upperId = Math.floor(refId) + 1;
+        subtractIds = upperId - refId;
         newId = Number(subtractIds) / 2 + Number(refId);
         break;
       case "mid":
-        upperNote = await Note.min('refId', { where: { refId: { [Op.gt]: refId }, isDeleted: false}})
-        subtractIds = upperNote - refId;
+        upperId = await Note.min('refId', { where: { refId: { [Op.gt]: refId }, isDeleted: false}})
+        subtractIds = upperId - refId;
         let divideNums = Number(subtractIds) / 2
         newId = Number(divideNums) + Number(refId);
         break;
       case "bot":
-        upperNote = await Note.min('refId')
-        newId = Number(upperNote) / 2;
+        upperId = await Note.min('refId')
+        newId = Number(upperId) / 2;
         break;
       default: 
         return res.status(422).json({message: "Unable to move note to location"})
