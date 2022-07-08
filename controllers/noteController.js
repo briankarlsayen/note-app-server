@@ -5,8 +5,7 @@ exports.createNote = async (req, res, next) => {
   const { title, description, body } = req.body;
   try {
     const countNote = await Note.count()
-    // return res.json(countNote)
-    const note = await Note.create({ title, description, body, refId: countNote });
+    const note = await Note.create({ title, description, body, refId: countNote + 1 });
     res.status(201).json({message: "Successfully created", note})
   } catch(error) {
     return res.status(422).json({message: "error: ", error})
@@ -67,17 +66,43 @@ exports.archiveNote = async (req, res, next) => {
 }
 
 exports.updateNotePosition = async (req, res, next) => {
-  const { refId } = req.body
+  const { refUuid } = req.body
   const uuid = req.params.uuid;
   try {
     const note = await Note.findOne({ where: { uuid }});
     if(!note) return res.status(422).json({message: "Unable to find note"})
-    const upperNote = await Note.min('refId', { where: { refId: { [Op.gt]: refId }, isDeleted: false}});
-    if(!upperNote) return res.status(422).json({message: "Unable to move note to location"})
 
-    let subtractIds = upperNote - refId;
-    let newId = subtractIds < 1 ? subtractIds / 2 + refId : 0.5 + refId;
-    // return res.json(uuid)
+    const refNote = refUuid ? await Note.findOne({ where: { uuid: refUuid }, isDeleted: false}) : null;
+    const refId = refNote ? refNote.refId : null;
+
+    let notePosition = refId ? "mid" : "bot";
+    const upperMost = await Note.max('refId')
+    if(Number(refId) === Number(upperMost)) notePosition = "top";
+
+    let subtractIds = 0;
+    let upperNote = 0;
+    let newId = 0;
+
+    switch(notePosition){
+      case "top":
+        upperNote = Math.floor(refId) + 1;
+        subtractIds = upperNote - refId;
+        newId = Number(subtractIds) / 2 + Number(refId);
+        break;
+      case "mid":
+        upperNote = await Note.min('refId', { where: { refId: { [Op.gt]: refId }, isDeleted: false}})
+        subtractIds = upperNote - refId;
+        let divideNums = Number(subtractIds) / 2
+        newId = Number(divideNums) + Number(refId);
+        break;
+      case "bot":
+        upperNote = await Note.min('refId')
+        newId = Number(upperNote) / 2;
+        break;
+      default: 
+        return res.status(422).json({message: "Unable to move note to location"})
+    }
+    
     note.refId = newId;
     note.save();
 
