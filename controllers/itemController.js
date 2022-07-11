@@ -5,12 +5,51 @@ const fs = require('fs');
 const path =require('path');
 const mime = require('mime');
 
+const repositionItem = async({ refUuid }) => {
+  const refNote = refUuid ? await Item.findOne({ where: { uuid: refUuid }, isDeleted: false}) : null;
+    const refId = refNote ? refNote.refId : null;
+    
+    let itemPosition = refId ? "mid" : "bot";
+    const upperMost = await Item.max('refId')
+    if(Number(refId) === Number(upperMost)) itemPosition = "top";
+
+    let subtractIds = 0;
+    let upperId = 0;
+    let newId = 0;
+    
+    switch(itemPosition){
+      case "top":
+        upperId = Math.floor(refId) + 1;
+        subtractIds = upperId - refId;
+        newId = Number(subtractIds) / 2 + Number(refId);
+        break;
+      case "mid":
+        upperId = await Item.min('refId', { where: { refId: { [Op.gt]: refId }, isDeleted: false}})
+        subtractIds = upperId - refId;
+        let divideNums = Number(subtractIds) / 2
+        newId = Number(divideNums) + Number(refId);
+        break;
+      case "bot":
+        upperId = await Item.min('refId')
+        newId = Number(upperId) / 2;
+        break;
+      default: 
+        return { success: 0, message: "Unable to move note to location" }
+    }
+    return { success: 1, newId };
+}
+
+
 exports.createItem = async (req, res, next) => {
-  const { noteUuid, title, body, type, } = req.body;
+  const { noteUuid, title, body, type, refUuid } = req.body;
   try {
     const note = await Note.findOne({ where: {uuid: noteUuid } })
-    const countCol = await Item.count()
-    const item = await Item.create({title, body, type, noteId: note.id, checked: 0, refId: countCol + 1, isDeleted: 0});
+    if(!note) return res.status(422).json({ message: "Unable to find note" })
+
+    const response = await repositionItem({ refUuid })
+    if(!response.success) return res.status(422).json(response.message)
+
+    const item = await Item.create({title, body, type, noteId: note.id, checked: 0, refId: response.newId, isDeleted: 0});
     if(type === "Bookmark") {
       const snapshot = await createSnapshot({ url: title })
       console.log('snapshot', snapshot)
@@ -120,38 +159,10 @@ exports.updateItemPosition = async (req, res, next) => {
     const item = await Item.findOne({ where: { uuid }});
     if(!item) return res.status(422).json({message: "Unable to find item"})
 
-    const refNote = refUuid ? await Item.findOne({ where: { uuid: refUuid }, isDeleted: false}) : null;
-    const refId = refNote ? refNote.refId : null;
-    
-    let itemPosition = refId ? "mid" : "bot";
-    const upperMost = await Item.max('refId')
-    if(Number(refId) === Number(upperMost)) itemPosition = "top";
-
-    let subtractIds = 0;
-    let upperId = 0;
-    let newId = 0;
-    
-    switch(itemPosition){
-      case "top":
-        upperId = Math.floor(refId) + 1;
-        subtractIds = upperId - refId;
-        newId = Number(subtractIds) / 2 + Number(refId);
-        break;
-      case "mid":
-        upperId = await Item.min('refId', { where: { refId: { [Op.gt]: refId }, isDeleted: false}})
-        subtractIds = upperId - refId;
-        let divideNums = Number(subtractIds) / 2
-        newId = Number(divideNums) + Number(refId);
-        break;
-      case "bot":
-        upperId = await Item.min('refId')
-        newId = Number(upperId) / 2;
-        break;
-      default: 
-        return res.status(422).json({message: "Unable to move item to location"})
-    }
+    const response = await repositionItem({ refUuid })
+    if(!response.success) return res.status(422).json(response.message)
    
-    item.refId = newId;
+    item.refId = response.newId;
     item.save();
 
     res.status(201).json({message: "Successfully update", data: item})
