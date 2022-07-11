@@ -20,8 +20,10 @@ const repositionNote = async({ refUuid }) => {
         newId = Number(subtractIds) / 2 + Number(refId);
         break;
       case "mid":
-        upperId = await Note.min('refId', { where: { refId: { [Op.gt]: refId }, isDeleted: false}})
+        upperId = await Note.min('refId', { where: { refId: { [Op.gt]: refId }}, isDeleted: false})
         subtractIds = upperId - refId;
+        console.log('refId', refId)
+        console.log('upperId', upperId)
         let divideNums = Number(subtractIds) / 2
         newId = Number(divideNums) + Number(refId);
         break;

@@ -24,7 +24,7 @@ const repositionItem = async({ refUuid }) => {
         newId = Number(subtractIds) / 2 + Number(refId);
         break;
       case "mid":
-        upperId = await Item.min('refId', { where: { refId: { [Op.gt]: refId }, isDeleted: false}})
+        upperId = await Item.min('refId', { where: { refId: { [Op.gt]: refId }}, isDeleted: false})
         subtractIds = upperId - refId;
         let divideNums = Number(subtractIds) / 2
         newId = Number(divideNums) + Number(refId);
