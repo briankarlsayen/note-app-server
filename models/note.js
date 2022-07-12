@@ -9,9 +9,11 @@ module.exports = (sequelize, DataTypes) => {
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
-    static associate({ Item }) {
+    static associate({ Item, User }) {
       // define association here
       this.hasMany(Item, { foreignKey: 'noteId', as: 'items' })
+      this.belongsTo(User, { foreignKey: 'userId', as: 'user' })
+
     }
     toJSON() {
       return { ...this.get(), id: undefined}
@@ -40,7 +42,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     isDeleted: {
       type: DataTypes.BOOLEAN,
-      defaultValue: 0,
+      defaultValue: false,
     },
   }, {
     sequelize,
