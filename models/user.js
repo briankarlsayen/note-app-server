@@ -13,6 +13,9 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       this.hasMany(Note, { foreignKey: 'userId', as: 'notes' })
     }
+    toJSON() {
+      return { ...this.get(), id: undefined, password: undefined}
+    }
   }
   User.init({
     uuid: {
@@ -32,7 +35,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
     },
     mobileNo: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING,
       allowNull: false,
     },
     password: {

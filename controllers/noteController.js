@@ -44,6 +44,7 @@ exports.createNote = async (req, res, next) => {
 
     const response = await repositionNote({ refUuid })
     if(!response.success) return res.status(422).json(response.message)
+    console.log('response', response)
 
     const note = await Note.create({ title, description, body, refId: response.newId });
     res.status(201).json({message: "Successfully created", note})
