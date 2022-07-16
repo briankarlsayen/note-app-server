@@ -1,6 +1,3 @@
-// TODO work 2hrs === !done ? remove userId in user model : next()
-
-
 const express = require('express');
 const app = express();
 const cors = require("cors")
@@ -43,7 +40,7 @@ app.use(
     proxy: true, 
     expiration: 24 * 60 * 60 * 1000,
     cookie: {
-      maxAge: 1000 * 60 * 1,
+      maxAge: 1000 * 60 * 10
     }
   })
 );
@@ -60,7 +57,7 @@ app.get('/', (req, res) => {
   res.json('Routes alive')
 })
 
-app.get('/loginfailed', (req, res) => {
+app.post('/loginfailed', (req, res) => {
   if(req.session.messages) {
     if(req.session.messages.length) return res.status(401).json({ message: req.session.messages.slice(-1).pop() })
   }
