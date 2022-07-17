@@ -4,7 +4,6 @@ const cors = require("cors")
 const passport = require('passport')
 const session = require('express-session');
 
-require("dotenv").config();
 const PORT = process.env.PORT || 5632
 const { sequelize } = require('./models')
 
