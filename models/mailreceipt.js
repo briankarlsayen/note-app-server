@@ -3,45 +3,39 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class Item extends Model {
+  class MailReceipt extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
-    static associate({ Note, Preview }) {
+    static associate(models) {
       // define association here
-      this.belongsTo(Note, { foreignKey: 'noteId', as: 'note' })
-      this.hasOne(Preview, { foreignKey: 'itemId', as: 'preview' })
     }
     toJSON() {
-      return { ...this.get(), id: undefined, noteId: undefined}
+      return { ...this.get(), id: undefined}
     }
   }
-  Item.init({
-    uuid: {
-      type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4
-    },
-    refId: {
-      type: DataTypes.DECIMAL,
-      allowNull: false,
-    },
-    title: {
+  MailReceipt.init({
+    msgId: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    body: {
+    to: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    checked: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
-    },
-    type: {
+    subject: {
       type: DataTypes.STRING,
       allowNull: false,
+    },
+    code: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    expires: {
+      allowNull: false,
+      type: DataTypes.DATE
     },
     isDeleted: {
       type: DataTypes.BOOLEAN,
@@ -49,8 +43,8 @@ module.exports = (sequelize, DataTypes) => {
     },
   }, {
     sequelize,
-    tableName: "items",
-    modelName: 'Item',
+    tableName: "mailReceipts",
+    modelName: 'MailReceipt',
   });
-  return Item;
+  return MailReceipt;
 };

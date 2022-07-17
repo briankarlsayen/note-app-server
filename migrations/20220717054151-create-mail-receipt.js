@@ -1,40 +1,36 @@
 'use strict';
 module.exports = {
   async up(queryInterface, DataTypes) {
-    await queryInterface.createTable('notes', {
+    await queryInterface.createTable('mailReceipts', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: DataTypes.INTEGER
       },
-      uuid: {
-        type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4
-      },
-      refId: {
-        type: DataTypes.DECIMAL,
-        allowNull: false,
-      },
-      title: {
+      msgId: {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      description: {
+      to: {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      body: {
+      subject: {
         type: DataTypes.STRING,
+        allowNull: false,
+      },
+      code: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      expires: {
+        type: DataTypes.DATE,
         allowNull: false,
       },
       isDeleted: {
         type: DataTypes.BOOLEAN,
-        allowNull: false,
-      },
-      userId: {
-        type: DataTypes.INTEGER,
-        allowNull: false
+        defaultValue: false,
       },
       createdAt: {
         allowNull: false,
@@ -47,6 +43,6 @@ module.exports = {
     });
   },
   async down(queryInterface, DataTypes) {
-    await queryInterface.dropTable('notes');
+    await queryInterface.dropTable('mailReceipts');
   }
 };

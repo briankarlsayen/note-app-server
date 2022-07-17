@@ -3,45 +3,48 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class Item extends Model {
+  class User extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
-    static associate({ Note, Preview }) {
+    static associate({ Note }) {
       // define association here
-      this.belongsTo(Note, { foreignKey: 'noteId', as: 'note' })
-      this.hasOne(Preview, { foreignKey: 'itemId', as: 'preview' })
+      this.hasMany(Note, { foreignKey: 'userId', as: 'notes' })
     }
     toJSON() {
-      return { ...this.get(), id: undefined, noteId: undefined}
+      return { ...this.get(), id: undefined, password: undefined}
     }
   }
-  Item.init({
+  User.init({
     uuid: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4
     },
-    refId: {
-      type: DataTypes.DECIMAL,
-      allowNull: false,
-    },
-    title: {
+    firstName: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    body: {
+    lastName: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    checked: {
+    email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    mobileNo: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    password: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    isActive: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
-    },
-    type: {
-      type: DataTypes.STRING,
-      allowNull: false,
     },
     isDeleted: {
       type: DataTypes.BOOLEAN,
@@ -49,8 +52,8 @@ module.exports = (sequelize, DataTypes) => {
     },
   }, {
     sequelize,
-    tableName: "items",
-    modelName: 'Item',
+    tableName: "users",
+    modelName: 'User',
   });
-  return Item;
+  return User;
 };
