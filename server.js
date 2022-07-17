@@ -20,17 +20,14 @@ require('./config/passport-config')
 
 // * init sequelize session
 const SequelizeStore = require("connect-session-sequelize")(session.Store);
+const storeParams = new SequelizeStore({
+  db: sequelize,
+  tableName: "sessions",
+})
 
 app.use(cors())
 app.use(express.json())
 app.use(express.urlencoded({extended: false}))
-
-const storeParams = new SequelizeStore({
-  db: sequelize,
-  tableName: "sessions",
-  // extendDefaultFields: extendDefaultFields,
-})
-
 app.use(
   session({
     secret: process.env.SECRET_SESSION,
@@ -67,12 +64,11 @@ app.get('/loginfailed', (req, res) => {
 
 app.get('/protected', protect, (req, res) => {
   return res.status(200).json(req.user)
-  // return res.status(200).json({message: "You are authenticated"})
 })
 
 app.use('/notes', protect, noteRoutes)
-app.use('/items', itemRoutes)
-app.use('/previews', previewRoutes)
+app.use('/items', protect, itemRoutes)
+app.use('/previews', protect, previewRoutes)
 app.use('/users', userRoutes)
 
 app.listen(PORT, async() => {
