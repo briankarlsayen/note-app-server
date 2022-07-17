@@ -38,9 +38,10 @@ app.use(
     saveUninitialized: true,
     resave: false,
     proxy: true, 
+    // * 1000 - msec to sec, 60 sec, 60 min, 24 hrs
     expiration: 24 * 60 * 60 * 1000,
     cookie: {
-      maxAge: 1000 * 60 * 10
+      maxAge: 1000 * 60 * 60 * 24
     }
   })
 );
