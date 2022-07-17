@@ -1,6 +1,6 @@
 // TODO reset password route
 
-const { User } = require('../models')
+const { User, MailReceipt } = require('../models')
 const bcrypt = require('bcrypt')
 const { Op } = require("sequelize");
 const { sendEmail } = require('../utilities/sendEmail')
@@ -101,6 +101,31 @@ exports.forgotPassword = (req, res, next) => {
     }
     sendEmail(options)
     res.status(200).json({message: "Mail successfully sent"}) 
+  } catch (error) {
+    console.log('catch', error)
+    return res.status(422).json({message: "error: ", error})
+  }
+}
+
+exports.changePassword = async(req, res, next) => {
+  const { password, retyped } = req.body;
+  const { id } = req.params
+  try {
+    const currentDate = new Date()
+    const checkReceipt = await MailReceipt.findOne({ where: { msgId: id, expires: { [Op.gt]: currentDate }, isDeleted: false }})
+    if(!checkReceipt) return res.status(422).json({message: "Your request has already expired, please make another request"})
+
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds)
+
+    const user = await User.findOne({where: { email: checkReceipt.to, isDeleted: false }})
+    if(!user) return res.status(422).json({message: "Unable to find user"})
+    user.password = hashedPassword;
+    user.save()
+    
+    checkReceipt.isDeleted = true;
+    checkReceipt.save()
+    res.status(200).json({message: "Password successfully changed"}) 
   } catch (error) {
     console.log('catch', error)
     return res.status(422).json({message: "error: ", error})

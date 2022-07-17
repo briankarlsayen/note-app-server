@@ -1,4 +1,4 @@
-const { Item, Note } = require('../models')
+const { Item, Note, User } = require('../models')
 const { Op } = require("sequelize");
 
 const repositionNote = async({ refUuid }) => {
@@ -37,16 +37,18 @@ const repositionNote = async({ refUuid }) => {
     return { success: 1, newId };
 }
 
-
 exports.createNote = async (req, res, next) => {
   const { title, description, body, refUuid } = req.body;
+  const { uuid } = req.user
   try {
+    const user = await User.findOne({ where: { uuid, isDeleted: false}})
+    if(!user) return res.status(422).json({message: "Invalid account"})
 
     const response = await repositionNote({ refUuid })
     if(!response.success) return res.status(422).json(response.message)
     console.log('response', response)
 
-    const note = await Note.create({ title, description, body, refId: response.newId });
+    const note = await Note.create({ title, description, body, refId: response.newId, userId: user.id });
     res.status(201).json({message: "Successfully created", note})
   } catch(error) {
     return res.status(422).json({message: "error: ", error})
@@ -54,8 +56,12 @@ exports.createNote = async (req, res, next) => {
 }
 
 exports.getNotes = async (req, res, next) => {
+  const { uuid } = req.user
   try {
-    const note = await Note.findAll({ where: { isDeleted: false },
+    const user = await User.findOne({ where: { uuid, isDeleted: false}})
+    if(!user) return res.status(422).json({message: "Invalid account"})
+
+    const note = await Note.findAll({ where: { userId: user.id, isDeleted: false },
       order: [
         ['refId', 'ASC'],
         ['title', 'ASC'],

@@ -1,5 +1,6 @@
 const nodemailer = require("nodemailer");
 const { forgotPassword, registrationReceipt } = require('./emailMessage')
+const { MailReceipt } = require('../models')
 
 const sendEmail = (options) => {
   console.log('options', options)
@@ -34,11 +35,28 @@ const sendEmail = (options) => {
   };
   console.log('mailOptions', mailOptions)
   
-  transporter.sendMail(mailOptions, function (err, info) {
+  transporter.sendMail(mailOptions, async function (err, info) {
     if (err) {
       console.log('err', err);
+      MailReceipt.create()
       return {success: 0, data: err}
     } else {
+      const [generatedId] = info.messageId.slice(1,info.messageId.length).split(/@/)
+      Date.prototype.addMinutes = function(m) {
+        this.setTime(this.getTime() + (m*60*1000));
+        return this;
+      }
+      // * addmin min per num
+      const expireTime = new Date().addMinutes(1)
+
+      const receipt = {
+        msgId: generatedId,
+        to: options.to,
+        subject: options.subject,
+        code: options.code,
+        expires: expireTime,
+      }
+      const createMailReceipt = await MailReceipt.create(receipt)
       console.log('info', info);
       return {success: 1, data: info}
     }

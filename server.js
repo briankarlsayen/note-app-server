@@ -57,7 +57,7 @@ app.get('/', (req, res) => {
   res.json('Routes alive')
 })
 
-app.post('/loginfailed', (req, res) => {
+app.get('/loginfailed', (req, res) => {
   if(req.session.messages) {
     if(req.session.messages.length) return res.status(401).json({ message: req.session.messages.slice(-1).pop() })
   }
@@ -69,7 +69,7 @@ app.get('/protected', protect, (req, res) => {
   // return res.status(200).json({message: "You are authenticated"})
 })
 
-app.use('/notes', noteRoutes)
+app.use('/notes', protect, noteRoutes)
 app.use('/items', itemRoutes)
 app.use('/previews', previewRoutes)
 app.use('/users', userRoutes)

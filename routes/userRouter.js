@@ -12,6 +12,7 @@ const {
   getUser,
   archiveUser,
   forgotPassword,
+  changePassword,
 } = require("../controllers/userController");
 
 router.route("/register").post(register);
@@ -22,5 +23,6 @@ router.route("/").get(protect, getUser);
 router.route("/all").get(protect, getAllUsers);
 router.route("/delete/:uuid").put(protect, archiveUser);
 router.route("/forgotpassword").post(forgotPassword);
+router.route("/changepassword/:id").put(changePassword);
 
 module.exports = router;
