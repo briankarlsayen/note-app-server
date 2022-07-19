@@ -131,3 +131,15 @@ exports.changePassword = async(req, res, next) => {
     return res.status(422).json({message: "error: ", error})
   }
 }
+
+exports.loginFailed = async(req, res, next) => {
+  try {
+    // if(req.session.messages) {
+    //   if(req.session.messages.length) return res.status(401).json({ message: req.session.messages.slice(-1).pop() })
+    // }
+    return res.status(401).json({message: "Invalid username or password"})
+  } catch (error) {
+    console.log('catch', error)
+    return res.status(422).json({message: "error: ", error})
+  }
+}

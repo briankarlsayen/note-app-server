@@ -8,7 +8,6 @@ const PORT = process.env.PORT || 5632
 const { sequelize } = require('./models')
 
 const { protect } = require("./middlewares/auth")
-
 const itemRoutes = require('./routes/itemRouter')
 const noteRoutes = require('./routes/noteRouter')
 const previewRoutes = require('./routes/previewRouter')
@@ -52,13 +51,6 @@ app.get('/', (req, res) => {
   // }
   // res.json(`This site has been accessed ${req.session.timesVisited} times`)
   res.json('Routes alive')
-})
-
-app.get('/loginfailed', (req, res) => {
-  if(req.session.messages) {
-    if(req.session.messages.length) return res.status(401).json({ message: req.session.messages.slice(-1).pop() })
-  }
-  return res.status(401).json({message: "Invalid username or password"})
 })
 
 app.get('/protected', protect, (req, res) => {
