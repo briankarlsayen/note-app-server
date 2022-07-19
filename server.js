@@ -22,7 +22,8 @@ const storeParams = new SequelizeStore({
   db: sequelize,
   tableName: "sessions",
 })
-const urlApp = "http://localhost:3000"
+// const URLAPP = "http://localhost:3000"
+const urlApp = process.env.URLAPP
 app.use(cors({ credentials: true, origin: urlApp }))
 app.all('*', function(req, res, next) {
 
