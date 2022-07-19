@@ -22,8 +22,18 @@ const storeParams = new SequelizeStore({
   db: sequelize,
   tableName: "sessions",
 })
+const urlApp = "http://localhost:3000"
+app.use(cors({ credentials: true, origin: urlApp }))
+app.all('*', function(req, res, next) {
 
-app.use(cors({ credentials: true, origin: "http://localhost:3000" }))
+  res.setHeader("Access-Control-Allow-Origin", urlApp);
+  res.setHeader("Access-Control-Allow-Headers", "X-Requested-With");
+  res.setHeader("Access-Control-Allow-Credentials", true);
+  next();
+});
+
+app.set("trust proxy",1);
+
 app.use(express.json())
 app.use(express.urlencoded({extended: false}))
 app.use(
@@ -40,6 +50,7 @@ app.use(
     }
   })
 );
+
 app.use(passport.initialize());
 app.use(passport.session());
 
