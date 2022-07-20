@@ -18,7 +18,7 @@ const {
 
 router.route("/register").post(register);
 router.route("/login").post(passport.authenticate('local', {failureRedirect : '/users/loginfailed', failureMessage : true}), login);
-router.route("/logout").post(protect, logout);
+router.route("/logout").post(logout);
 router.route("/edit").put(protect, updateUser);
 router.route("/").get(protect, getUser);
 router.route("/all").get(protect, getAllUsers);
