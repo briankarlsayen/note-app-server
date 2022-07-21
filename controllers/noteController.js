@@ -39,14 +39,13 @@ const repositionNote = async({ refUuid }) => {
 
 exports.createNote = async (req, res, next) => {
   const { title, description, body, refUuid } = req.body;
-  const { uuid } = req.user
+  const uuid = req.jwt.sub
   try {
     const user = await User.findOne({ where: { uuid, isDeleted: false}})
     if(!user) return res.status(422).json({message: "Invalid account"})
 
     const response = await repositionNote({ refUuid })
     if(!response.success) return res.status(422).json(response.message)
-    console.log('response', response)
 
     const note = await Note.create({ title, description, body, refId: response.newId, userId: user.id });
     res.status(201).json({message: "Successfully created", note})
@@ -56,7 +55,7 @@ exports.createNote = async (req, res, next) => {
 }
 
 exports.getNotes = async (req, res, next) => {
-  const { uuid } = req.user
+  const uuid = req.jwt.sub
   try {
     const user = await User.findOne({ where: { uuid, isDeleted: false}})
     if(!user) return res.status(422).json({message: "Invalid account"})

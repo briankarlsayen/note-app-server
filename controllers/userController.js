@@ -1,9 +1,12 @@
-// TODO reset password route
-
 const { User, MailReceipt } = require('../models')
 const bcrypt = require('bcrypt')
 const { Op } = require("sequelize");
 const { sendEmail } = require('../utilities/sendEmail')
+const { issueJWT } = require('../middlewares/auth')
+
+const validatePassword = async(password, dbPassword) => {
+  return bcrypt.compare(password, dbPassword)
+}
 
 exports.register = async (req, res, next) => {
   const { firstName, lastName, email, mobileNo, password, } = req.body;
@@ -37,26 +40,27 @@ exports.getAllUsers = async (req, res, next) => {
   }
 }
 
-exports.login = (req, res, next) => {
-  if(req.isAuthenticated()) {
-
-    return res.status(200).json({message: `Welcome ${req.user.firstName} ${req.user.lastName}`})
-  } 
-  return res.status(422).json({message: "Login failed"})
-}
-
-exports.logout = (req, res, next) => {
+exports.login = async(req, res, next) => {
+  const { username, password } = req.body;
   try {
-    req.session.destroy()
-    res.status(200).json({message: "Successfully logout"})
-  } catch (error) {
+    const user = await User.findOne({ where: { email: username }}) 
+    if (!user) return res.status(422).json({success: false, message: "Invalid user"})
+
+    if (await validatePassword(password, user.password)) {
+      const tokenObject = issueJWT(user);
+      return res.status(200).json({ success: true, token: tokenObject.token, expiresIn: tokenObject.expires });
+    } else {
+      return res.status(422).json({success: false, message: "Login failed"})
+    }
+
+  } catch(error) {
     return res.status(422).json({message: "error: ", error})
   }
 }
 
 exports.updateUser = async(req, res, next) => {
   const { firstName, lastName, email, mobileNo, } = req.body;
-  const { uuid } = req.user
+  const uuid = req.jwt.sub
   try {
     const emailExist = await User.findOne({ where: { uuid: { [Op.not]: uuid },email }})
     if(emailExist) return res.status(422).json({message: "Email already exist"})
@@ -75,7 +79,13 @@ exports.updateUser = async(req, res, next) => {
 }
 
 exports.getUser = async(req, res, next) => {
-  return res.status(200).json(req.user)
+  const uuid = req.jwt.sub
+  try {
+    const user = await User.findOne({ where: { uuid, isDeleted: false }})
+    return res.status(200).json(user)
+  } catch(error) {
+    return res.status(422).json({message: "error: ", error})
+  }
 }
 
 exports.archiveUser = async(req, res, next) => {
@@ -126,18 +136,6 @@ exports.changePassword = async(req, res, next) => {
     checkReceipt.isDeleted = true;
     checkReceipt.save()
     res.status(200).json({message: "Password successfully changed"}) 
-  } catch (error) {
-    console.log('catch', error)
-    return res.status(422).json({message: "error: ", error})
-  }
-}
-
-exports.loginFailed = async(req, res, next) => {
-  try {
-    // if(req.session.messages) {
-    //   if(req.session.messages.length) return res.status(401).json({ message: req.session.messages.slice(-1).pop() })
-    // }
-    return res.status(401).json({message: "Invalid username or password"})
   } catch (error) {
     console.log('catch', error)
     return res.status(422).json({message: "error: ", error})

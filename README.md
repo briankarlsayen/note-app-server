@@ -1,3 +1,7 @@
+## generate secret keys
+node generateKeyPair.js
+
+save the generated secret key to your .env file
 ## remove all migration
 npx sequelize db:migrate:undo:all
 
