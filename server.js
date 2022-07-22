@@ -11,6 +11,7 @@ const noteRoutes = require('./routes/noteRouter')
 const previewRoutes = require('./routes/previewRouter')
 const userRoutes = require('./routes/userRouter')
 
+
 // const urlApp = process.env.URLAPP
 // app.use(cors({ credentials: true, origin: urlApp }))
 app.use(cors())
