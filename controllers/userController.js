@@ -17,7 +17,7 @@ exports.register = async (req, res, next) => {
     const hashedPassword = await bcrypt.hash(password, saltRounds)
 
     const user = await User.create({ firstName, lastName, email, mobileNo, password: hashedPassword });
-    if(!user) return res.status(422).json({message: "Unable to create user"})
+    if(!user) return res.status(422).json({success: false, message: "Unable to create user"})
     const options = {
       to: email,
       subject: 'Successful registration',
@@ -25,9 +25,9 @@ exports.register = async (req, res, next) => {
     }
     sendEmail(options)
 
-    res.status(201).json({message: "Successfully created", user})
+    res.status(201).json({success: true, message: "Successfully created", user})
   } catch(error) {
-    return res.status(422).json({message: "error: ", error})
+    return res.status(422).json({success: false, message: "error: ", error})
   }
 }
 
@@ -36,7 +36,7 @@ exports.getAllUsers = async (req, res, next) => {
     const user = await User.findAll({ where: { isDeleted: false }})
     res.status(201).json(user)
   } catch(error) {
-    return res.status(422).json({message: "error: ", error})
+    return res.status(422).json({success: false, message: "error: ", error})
   }
 }
 
@@ -66,7 +66,7 @@ exports.updateUser = async(req, res, next) => {
     if(emailExist) return res.status(422).json({message: "Email already exist"})
 
     const user = await User.findOne({ where: { uuid }})
-    if(!user) return res.status(422).json({ message: "Unable to find user"})
+    if(!user) return res.status(422).json({ success: false, message: "Unable to find user"})
     user.firstName = firstName;
     user.lastName = lastName;
     user.email = email;
@@ -74,7 +74,7 @@ exports.updateUser = async(req, res, next) => {
     user.save()
     res.status(201).json(user)
   } catch (error) {
-    return res.status(422).json({message: "error: ", error})
+    return res.status(422).json({success: false, message: "error: ", error})
   }
 }
 
@@ -110,10 +110,10 @@ exports.forgotPassword = (req, res, next) => {
       code: 'FP',
     }
     sendEmail(options)
-    res.status(200).json({message: "Mail successfully sent"}) 
+    res.status(200).json({success: true, message: "Mail successfully sent"}) 
   } catch (error) {
     console.log('catch', error)
-    return res.status(422).json({message: "error: ", error})
+    return res.status(422).json({success: false, message: "error: ", error})
   }
 }
 
@@ -123,21 +123,21 @@ exports.changePassword = async(req, res, next) => {
   try {
     const currentDate = new Date()
     const checkReceipt = await MailReceipt.findOne({ where: { msgId: id, expires: { [Op.gt]: currentDate }, isDeleted: false }})
-    if(!checkReceipt) return res.status(422).json({message: "Your request has already expired, please make another request"})
+    if(!checkReceipt) return res.status(422).json({success: false, message: "Your request has already expired, please make another request"})
 
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds)
 
     const user = await User.findOne({where: { email: checkReceipt.to, isDeleted: false }})
-    if(!user) return res.status(422).json({message: "Unable to find user"})
+    if(!user) return res.status(422).json({success: false, message: "Unable to find user"})
     user.password = hashedPassword;
     user.save()
     
     checkReceipt.isDeleted = true;
     checkReceipt.save()
-    res.status(200).json({message: "Password successfully changed"}) 
+    res.status(200).json({success: true, message: "Password successfully changed"}) 
   } catch (error) {
     console.log('catch', error)
-    return res.status(422).json({message: "error: ", error})
+    return res.status(422).json({success: false, message: "error: ", error})
   }
 }
