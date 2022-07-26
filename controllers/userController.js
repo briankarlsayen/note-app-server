@@ -54,7 +54,7 @@ exports.login = async(req, res, next) => {
     }
 
   } catch(error) {
-    return res.status(422).json({message: "error: ", error})
+    return res.status(422).json({success: false, message: "error: ", error})
   }
 }
 
@@ -84,7 +84,7 @@ exports.getUser = async(req, res, next) => {
     const user = await User.findOne({ where: { uuid, isDeleted: false }})
     return res.status(200).json(user)
   } catch(error) {
-    return res.status(422).json({message: "error: ", error})
+    return res.status(422).json({success: false, message: "error: ", error})
   }
 }
 
@@ -92,12 +92,12 @@ exports.archiveUser = async(req, res, next) => {
   const { uuid } = req.params
   try {
     const user = await User.findOne({ where: { uuid, isDeleted: false }})
-    if(!user) return res.status(422).json({ message: "Unable to find user"})
+    if(!user) return res.status(422).json({ success: false, message: "Unable to find user"})
     user.isDeleted = true;
     user.save()
     res.status(201).json(user)
   } catch (error) {
-    return res.status(422).json({message: "error: ", error})
+    return res.status(422).json({ success: false, message: "error: ", error})
   }
 }
 
@@ -110,10 +110,10 @@ exports.forgotPassword = (req, res, next) => {
       code: 'FP',
     }
     sendEmail(options)
-    res.status(200).json({success: true, message: "Mail successfully sent"}) 
+    res.status(200).json({ success: true, message: "Mail successfully sent"}) 
   } catch (error) {
     console.log('catch', error)
-    return res.status(422).json({success: false, message: "error: ", error})
+    return res.status(422).json({ success: false, message: "error: ", error})
   }
 }
 
@@ -124,21 +124,21 @@ exports.changePassword = async(req, res, next) => {
     const currentDate = new Date()
     // const checkReceipt = await MailReceipt.findOne({ where: { msgId: id }})
     const checkReceipt = await MailReceipt.findOne({ where: { msgId: id, expires: { [Op.gt]: currentDate }, isDeleted: false }})
-    if(!checkReceipt) return res.status(422).json({success: false, message: "Your request has already expired, please make another request"})
+    if(!checkReceipt) return res.status(422).json({ success: false, message: "Your request has already expired, please make another request"})
 
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds)
 
     const user = await User.findOne({where: { email: checkReceipt.to, isDeleted: false }})
-    if(!user) return res.status(422).json({success: false, message: "Unable to find user"})
+    if(!user) return res.status(422).json({ success: false, message: "Unable to find user"})
     user.password = hashedPassword;
     user.save()
     
     checkReceipt.isDeleted = true;
     checkReceipt.save()
-    res.status(200).json({success: true, message: "Password successfully changed"}) 
+    res.status(200).json({ success: true, message: "Password successfully changed"}) 
   } catch (error) {
     console.log('catch', error)
-    return res.status(422).json({success: false, message: "error: ", error})
+    return res.status(422).json({ success: false, message: "error: ", error})
   }
 }
