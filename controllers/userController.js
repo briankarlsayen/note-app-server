@@ -17,7 +17,7 @@ exports.register = async (req, res, next) => {
     const hashedPassword = await bcrypt.hash(password, saltRounds)
 
     const user = await User.create({ firstName, lastName, email, mobileNo, password: hashedPassword });
-    if(!user) return res.status(422).json({message: "Unable to create user"})
+    if(!user) return res.status(422).json({success: false, message: "Unable to create user"})
     const options = {
       to: email,
       subject: 'Successful registration',
@@ -25,9 +25,9 @@ exports.register = async (req, res, next) => {
     }
     sendEmail(options)
 
-    res.status(201).json({message: "Successfully created", user})
+    res.status(201).json({success: true, message: "Successfully created", user})
   } catch(error) {
-    return res.status(422).json({message: "error: ", error})
+    return res.status(422).json({success: false, message: "error: ", error})
   }
 }
 
@@ -36,7 +36,7 @@ exports.getAllUsers = async (req, res, next) => {
     const user = await User.findAll({ where: { isDeleted: false }})
     res.status(201).json(user)
   } catch(error) {
-    return res.status(422).json({message: "error: ", error})
+    return res.status(422).json({success: false, message: "error: ", error})
   }
 }
 
