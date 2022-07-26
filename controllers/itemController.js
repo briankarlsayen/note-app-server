@@ -72,21 +72,21 @@ exports.createItem = async (req, res, next) => {
             itemId: item.id
           }
           const preview = await Preview.create(params);
-          return res.status(201).json({message: "Successfully created", item: {
+          return res.status(201).json({success: true, message: "Successfully created", item: {
             ...item.dataValues,
             preview
           }})
         })
       } else {
-        return res.status(201).json({message: "Unable to create snapshot", item})
+        return res.status(201).json({ success: false, message: "Unable to create snapshot", item})
       }
     } else if(type === "Text") {
-      res.status(201).json({message: "Successfully created", item})
+      res.status(201).json({success: true, message: "Successfully created", item})
     } else {
-      res.status(422).json({message: "Invalid item type"})
+      res.status(422).json({success: false, message: "Invalid item type"})
     }
   } catch(error) {
-    return res.status(422).json({message: "error: ", error})
+    return res.status(422).json({success: false, message: "error: ", error})
   }
 }
 exports.getItems = async (req, res, next) => {
@@ -98,7 +98,7 @@ exports.getItems = async (req, res, next) => {
     ]})
     res.status(201).json(item)
   } catch(error) {
-    return res.status(422).json({message: "error: ", error})
+    return res.status(422).json({success: false, message: "error: ", error})
   }
 }
 exports.getItemsByNoteId = async (req, res, next) => {
@@ -112,7 +112,7 @@ exports.getItemsByNoteId = async (req, res, next) => {
     ]})
     res.status(201).json(item)
   } catch(error) {
-    return res.status(422).json({message: "error: ", error})
+    return res.status(422).json({success: false, message: "error: ", error})
   }
 }
 exports.updateItem = async (req, res, next) => {
@@ -124,9 +124,9 @@ exports.updateItem = async (req, res, next) => {
     item.body = body;
     item.type = type;
     item.save()
-    res.status(201).json({message: "Item successfully updated", item})
+    res.status(201).json({success: true, message: "Item successfully updated", item})
   } catch(error) {
-    return res.status(422).json({message: "error: ", error})
+    return res.status(422).json({success: false, message: "error: ", error})
   }
 }
 exports.updateCheck = async (req, res, next) => {
@@ -135,9 +135,9 @@ exports.updateCheck = async (req, res, next) => {
     const item = await Item.findOne({ where: { uuid } })
     item.checked = !item.checked;
     item.save()
-    res.status(201).json({message: "Item successfully updated", item})
+    res.status(201).json({success: true, message: "Item successfully updated", item})
   } catch(error) {
-    return res.status(422).json({message: "error: ", error})
+    return res.status(422).json({success: false, message: "error: ", error})
   }
 }
 exports.archiveItem = async (req, res, next) => {
@@ -146,9 +146,9 @@ exports.archiveItem = async (req, res, next) => {
     const item = await Item.findOne({ where: { uuid } })
     item.isDeleted = true;
     item.save()
-    res.status(201).json({message: "Item successfully deleted", item})
+    res.status(201).json({success: true, message: "Item successfully deleted", item})
   } catch(error) {
-    return res.status(422).json({message: "error: ", error})
+    return res.status(422).json({success: false, message: "error: ", error})
   }
 }
 
@@ -165,8 +165,8 @@ exports.updateItemPosition = async (req, res, next) => {
     item.refId = response.newId;
     item.save();
 
-    res.status(201).json({message: "Successfully update", data: item})
+    res.status(201).json({success: true, message: "Successfully update", data: item})
   } catch(error) {
-    return res.status(422).json({message: "error: ", error})
+    return res.status(422).json({success: false, message: "error: ", error})
   }
 }
