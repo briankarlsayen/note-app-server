@@ -122,6 +122,7 @@ exports.changePassword = async(req, res, next) => {
   const { id } = req.params
   try {
     const currentDate = new Date()
+    // const checkReceipt = await MailReceipt.findOne({ where: { msgId: id }})
     const checkReceipt = await MailReceipt.findOne({ where: { msgId: id, expires: { [Op.gt]: currentDate }, isDeleted: false }})
     if(!checkReceipt) return res.status(422).json({success: false, message: "Your request has already expired, please make another request"})
 

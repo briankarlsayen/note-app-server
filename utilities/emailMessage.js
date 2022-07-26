@@ -1,5 +1,5 @@
-const forgotPassword = () => {
-  const newResetUrl = 'https://lock-manager-v1.web.app/app/locks'; 
+const forgotPassword = (id) => {
+  const newResetUrl = `https://note-app-client.web.app/reset-password/${id}`; 
   const backgroundColor = '#848585'
   const message = `
 <body marginheight="0" topmargin="0" marginwidth="0" style="margin: 0px; background-color: ${backgroundColor}" leftmargin="0">
