@@ -4,7 +4,6 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon -r dotenv/config server.js dotenv_config_path=.env",
     "build": "echo 'Building... not really doin much...'"
@@ -28,8 +27,5 @@
     "puppeteer": "^15.1.1",
     "sequelize": "^6.20.1",
     "sequelize-cli": "^6.4.1"
-  },
-  "devDependencies": {
-    "dotenv": "^16.0.2"
   }
 }

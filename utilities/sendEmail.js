@@ -2,7 +2,7 @@ const nodemailer = require("nodemailer");
 const { forgotPassword, registrationReceipt } = require('./emailMessage')
 const { MailReceipt } = require('../models')
 const crypto = require('crypto')
-require('dotenv').config()
+
 
 function generateUUID() { // Public Domain/MIT
   var d = new Date().getTime();//Timestamp
