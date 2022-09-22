@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon -r dotenv/config server.js dotenv_config_path=.env",
-    "build": "yarn && db-migrate",
+    "build": "yarn && npm run db-migrate",
     "db-migrate": "node_modules/.bin/sequelize db:migrate"
   },
   "author": "",
