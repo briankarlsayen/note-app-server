@@ -2,7 +2,7 @@ const crypto = require('crypto');
 const jsonwebtoken = require('jsonwebtoken');
 const fs = require('fs');
 const path = require('path');
-
+require('dotenv').config()
 
 const publicKey = Buffer.from(process.env.PUB_KEY , 'base64').toString('ascii');
 const privateKey = Buffer.from(process.env.PRIV_KEY , 'base64').toString('ascii');
