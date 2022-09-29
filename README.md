@@ -10,12 +10,17 @@ A restful api for [note-app-client](https://github.com/briankarlsayen/note-app-c
 ## Getting started
 - install dependecies
 ```
-npm run install
+npm install
 ```
 - generate secret keys, save the generated secret key to your .env file
 ```
 node generateKeyPair.js
 ```
+- create database
+```
+npx sequelize db:create
+```
+
 - apply migration
 ```
 npx sequelize db:migrate
