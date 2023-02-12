@@ -201,6 +201,7 @@ exports.changePassword = async (req, res, next) => {
   }
 };
 
+// TODO fix user password set allowNull
 // * create / login issued google account
 exports.googleSignIn = async (req, res, next) => {
   const { credentials } = req.body;
