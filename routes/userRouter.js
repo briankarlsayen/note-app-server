@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { protect } = require("../middlewares/auth")
+const { protect } = require("../middlewares/auth");
 
 const {
   register,
@@ -11,6 +11,7 @@ const {
   archiveUser,
   forgotPassword,
   changePassword,
+  googleSignIn,
 } = require("../controllers/userController");
 
 router.route("/register").post(register);
@@ -21,5 +22,6 @@ router.route("/all").get(protect, getAllUsers);
 router.route("/delete/:uuid").put(protect, archiveUser);
 router.route("/forgotpassword").post(forgotPassword);
 router.route("/changepassword/:id").put(changePassword);
+router.route("/gauth").post(googleSignIn);
 
 module.exports = router;
