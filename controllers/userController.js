@@ -27,6 +27,7 @@ exports.register = async (req, res, next) => {
       email,
       mobileNo,
       password: hashedPassword,
+      accType: "basic",
     });
     if (!user)
       return res
@@ -105,24 +106,9 @@ exports.updateUser = async (req, res, next) => {
 };
 
 exports.getUser = async (req, res, next) => {
-  const { sub, type } = req.jwt;
+  const { sub } = req.jwt;
   try {
-    let user;
-    switch (type) {
-      case "basic":
-        user = await User.findOne({ where: { uuid: sub, isDeleted: false } });
-        break;
-      case "gauth":
-        const gAuth = await Gauth.findOne({ where: { sub, isDeleted: false } });
-        const decodedObj = decodeToken(gAuth.credentials);
-        user = {
-          firstName: decodedObj.given_name,
-          lastName: decodedObj.family_name,
-          email: decodedObj.email,
-          image: decodedObj.picture,
-        };
-        break;
-    }
+    const user = await User.findOne({ where: { uuid: sub, isDeleted: false } });
     return res.status(200).json(user);
   } catch (error) {
     return res.status(422).json({ success: false, message: "error: ", error });
@@ -156,7 +142,6 @@ exports.forgotPassword = (req, res, next) => {
     sendEmail(options);
     res.status(200).json({ success: true, message: "Mail successfully sent" });
   } catch (error) {
-    console.log("catch", error);
     return res.status(422).json({ success: false, message: "error: ", error });
   }
 };
@@ -196,48 +181,48 @@ exports.changePassword = async (req, res, next) => {
       .status(200)
       .json({ success: true, message: "Password successfully changed" });
   } catch (error) {
-    console.log("catch", error);
     return res.status(422).json({ success: false, message: "error: ", error });
   }
 };
 
-// TODO fix user password set allowNull
-// * create / login issued google account
 exports.googleSignIn = async (req, res, next) => {
   const { credentials } = req.body;
   try {
-    console.log("start");
     if (!credentials)
       return res
         .status(422)
         .json({ success: false, message: "Missing input fields" });
 
     const decode = decodeToken(credentials);
-    console.log("then");
     const accountExist = await Gauth.findOne({
       where: { sub: decode.sub, isDeleted: false },
+      include: "user",
     });
-
-    console.log("accountExist", accountExist);
+    const accountJson = accountExist.toJSON();
+    let userData;
     if (!accountExist) {
-      console.log("decode", decode);
       const user = await User.create({
         firstName: decode.given_name,
         lastName: decode.family_name,
         email: decode.email,
+        accType: "gauth",
       });
+      const userJson = user.toJSON();
       const account = await Gauth.create({
         sub: decode.sub,
-        refId: user.id,
-        credentials,
+        userId: userJson.id,
       });
-      console.log("user", user);
+
       if (!account)
         return res
           .status(422)
           .json({ success: false, message: "Unable to create" });
+
+      userData = userJson;
+    } else {
+      userData = accountJson.user;
     }
-    const tokenObject = issueJWT(decode, "gauth");
+    const tokenObject = issueJWT(userData);
     return res.status(200).json({
       success: true,
       token: tokenObject.token,

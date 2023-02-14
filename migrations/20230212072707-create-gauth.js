@@ -16,14 +16,6 @@ module.exports = {
         type: DataTypes.DECIMAL,
         allowNull: false,
       },
-      credentials: {
-        type: DataTypes.STRING(1200),
-        allowNull: false,
-      },
-      refId: {
-        type: DataTypes.DECIMAL,
-        allowNull: false,
-      },
       userId: {
         type: DataTypes.INTEGER,
         allowNull: false,

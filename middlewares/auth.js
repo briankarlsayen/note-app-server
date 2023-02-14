@@ -9,13 +9,12 @@ const privateKey = Buffer.from(process.env.PRIV_KEY, "base64").toString(
   "ascii"
 );
 
-function issueJWT(user, type) {
-  const _id = user.uuid ? user.uuid : user.sub;
+function issueJWT(user) {
+  const _id = user.uuid;
   const expiresIn = "1d";
   const payload = {
     sub: _id,
     iat: Date.now(),
-    type,
   };
   const signedToken = jsonwebtoken.sign(payload, privateKey, {
     expiresIn: expiresIn,
