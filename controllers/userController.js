@@ -13,6 +13,7 @@ const validatePassword = async (password, dbPassword) => {
 exports.register = async (req, res, next) => {
   const { name, email, mobileNo, password } = req.body;
   try {
+    console.log("registering...");
     const emailExist = await User.findOne({
       where: { email, isDeleted: false },
     });
@@ -196,6 +197,7 @@ exports.changePassword = async (req, res, next) => {
 exports.googleSignIn = async (req, res, next) => {
   const { credentials } = req.body;
   try {
+    console.log("google signing in...");
     if (!credentials)
       return res
         .status(422)
