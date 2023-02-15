@@ -4,7 +4,7 @@ const jsonwebtoken = require("jsonwebtoken");
 const { Op } = require("sequelize");
 const { sendEmail } = require("../utilities/sendEmail");
 const { issueJWT } = require("../middlewares/auth");
-const { decodeToken } = require("../utilities/decode");
+const decodeToken = require("jwt-decode");
 
 const validatePassword = async (password, dbPassword) => {
   return bcrypt.compare(password, dbPassword);
