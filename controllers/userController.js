@@ -11,7 +11,7 @@ const validatePassword = async (password, dbPassword) => {
 };
 
 exports.register = async (req, res, next) => {
-  const { firstName, lastName, email, mobileNo, password } = req.body;
+  const { name, email, mobileNo, password } = req.body;
   try {
     const emailExist = await User.findOne({
       where: { email, isDeleted: false },
@@ -22,8 +22,7 @@ exports.register = async (req, res, next) => {
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     const user = await User.create({
-      firstName,
-      lastName,
+      name,
       email,
       mobileNo,
       password: hashedPassword,
@@ -50,7 +49,10 @@ exports.register = async (req, res, next) => {
 
 exports.getAllUsers = async (req, res, next) => {
   try {
-    const user = await User.findAll({ where: { isDeleted: false } });
+    const user = await User.findAll({
+      where: { isDeleted: false },
+      include: "gauth",
+    });
     res.status(201).json(user);
   } catch (error) {
     return res.status(422).json({ success: false, message: "error: ", error });
@@ -63,6 +65,10 @@ exports.login = async (req, res, next) => {
     const user = await User.findOne({ where: { email: username } });
     if (!user)
       return res.status(422).json({ success: false, message: "Invalid user" });
+    if (user.accType === "gauth")
+      return res
+        .status(422)
+        .json({ success: false, message: "Please sign in using gmail" });
 
     if (await validatePassword(password, user.password)) {
       const tokenObject = issueJWT(user, "basic");
@@ -80,7 +86,7 @@ exports.login = async (req, res, next) => {
 };
 
 exports.updateUser = async (req, res, next) => {
-  const { firstName, lastName, email, mobileNo } = req.body;
+  const { name, email, mobileNo } = req.body;
   const uuid = req.jwt.sub;
   try {
     const emailExist = await User.findOne({
@@ -94,8 +100,7 @@ exports.updateUser = async (req, res, next) => {
       return res
         .status(422)
         .json({ success: false, message: "Unable to find user" });
-    user.firstName = firstName;
-    user.lastName = lastName;
+    user.name = name;
     user.email = email;
     user.mobileNo = mobileNo;
     user.save();
@@ -108,7 +113,10 @@ exports.updateUser = async (req, res, next) => {
 exports.getUser = async (req, res, next) => {
   const { sub } = req.jwt;
   try {
-    const user = await User.findOne({ where: { uuid: sub, isDeleted: false } });
+    const user = await User.findOne({
+      where: { uuid: sub, isDeleted: false },
+      include: "gauth",
+    });
     return res.status(200).json(user);
   } catch (error) {
     return res.status(422).json({ success: false, message: "error: ", error });
@@ -194,20 +202,22 @@ exports.googleSignIn = async (req, res, next) => {
         .json({ success: false, message: "Missing input fields" });
 
     const decode = decodeToken(credentials);
+    console.log("decode", decode);
     const accountExist = await Gauth.findOne({
       where: { sub: decode.sub, isDeleted: false },
       include: "user",
     });
-    const accountJson = accountExist.toJSON();
+
+    // console.log("henlo", accountExist);
     let userData;
+
     if (!accountExist) {
       const user = await User.create({
-        firstName: decode.given_name,
-        lastName: decode.family_name,
+        name: decode.name,
         email: decode.email,
         accType: "gauth",
       });
-      const userJson = user.toJSON();
+      const userJson = user.dataValues; // .toJSON not working due to model restrict
       const account = await Gauth.create({
         sub: decode.sub,
         userId: userJson.id,
@@ -220,6 +230,8 @@ exports.googleSignIn = async (req, res, next) => {
 
       userData = userJson;
     } else {
+      const accountJson = accountExist.toJSON();
+
       userData = accountJson.user;
     }
     const tokenObject = issueJWT(userData);

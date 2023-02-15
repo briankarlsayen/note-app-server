@@ -6,8 +6,7 @@
     "host": "127.0.0.1",
     "dialect": "postgres"
   },
-  "test": {
-  },
+  "test": {},
   "production": {
     "username": "DATABASE_USER",
     "password": "DATABASE_PASSWORD",
