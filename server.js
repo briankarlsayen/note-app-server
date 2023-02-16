@@ -1,10 +1,10 @@
-const express = require('express');
+const express = require("express");
 const app = express();
-const cors = require('cors');
-require('dotenv').config();
+const cors = require("cors");
+require("dotenv").config();
 
 const PORT = process.env.PORT || 5632;
-const { sequelize } = require('./models');
+const { sequelize } = require("./models");
 
 // const urlApp = process.env.URLAPP
 // app.use(cors({ credentials: true, origin: urlApp }))
@@ -33,27 +33,27 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-const { protect } = require('./middlewares/auth');
-const itemRoutes = require('./routes/itemRouter');
-const noteRoutes = require('./routes/noteRouter');
-const previewRoutes = require('./routes/previewRouter');
-const userRoutes = require('./routes/userRouter');
+const { protect } = require("./middlewares/auth");
+const itemRoutes = require("./routes/itemRouter");
+const noteRoutes = require("./routes/noteRouter");
+const previewRoutes = require("./routes/previewRouter");
+const userRoutes = require("./routes/userRouter");
 
-app.get('/', (req, res) => {
-  res.json('Routes alive');
+app.get("/", (req, res) => {
+  res.json("Routes alive");
 });
 
-app.get('/protected', protect, (req, res) => {
+app.get("/protected", protect, (req, res) => {
   return res.status(200).json(req.jwt);
 });
 
-app.use('/notes', protect, noteRoutes);
-app.use('/items', protect, itemRoutes);
-app.use('/previews', protect, previewRoutes);
-app.use('/users', userRoutes);
+app.use("/notes", protect, noteRoutes);
+app.use("/items", protect, itemRoutes);
+app.use("/previews", protect, previewRoutes);
+app.use("/users", userRoutes);
 
-app.listen(PORT, async () => {
+app.listen(PORT, "0.0.0.0", async () => {
   console.log(`Listening to port ${PORT}`);
   await sequelize.authenticate();
-  console.log('Connected to database');
+  console.log("Connected to database");
 });
