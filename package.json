@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon -r dotenv/config server.js dotenv_config_path=.env",
     "build": "yarn && yarn exec sequelize db:migrate",
-    "db-migrate": "yarn exec sequelize db:migrate"
+    "db-migrate": "yarn exec sequelize db:migrate",
+    "vercel-build": "yarn && yarn exec sequelize db:migrate"
   },
   "author": "",
   "license": "ISC",
