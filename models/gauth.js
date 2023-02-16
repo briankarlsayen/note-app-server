@@ -1,5 +1,5 @@
-"use strict";
-const { Model } = require("sequelize");
+'use strict';
+const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class Gauth extends Model {
     /**
@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate({ User }) {
       // define association here
-      this.belongsTo(User, { foreignKey: "userId", as: "user" });
+      this.belongsTo(User, { foreignKey: 'userId', as: 'user' });
     }
   }
   Gauth.init(
@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
       },
-      sub: {
+      accId: {
         type: DataTypes.DECIMAL,
         allowNull: false,
       },
@@ -29,8 +29,8 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      tableName: "gauths",
-      modelName: "Gauth",
+      tableName: 'gauths',
+      modelName: 'Gauth',
     }
   );
   return Gauth;

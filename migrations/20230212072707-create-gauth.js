@@ -1,7 +1,7 @@
-"use strict";
+'use strict';
 module.exports = {
   async up(queryInterface, DataTypes) {
-    await queryInterface.createTable("gauths", {
+    await queryInterface.createTable('gauths', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -12,7 +12,7 @@ module.exports = {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
       },
-      sub: {
+      accId: {
         type: DataTypes.DECIMAL,
         allowNull: false,
       },
@@ -35,6 +35,6 @@ module.exports = {
     });
   },
   async down(queryInterface, DataTypes) {
-    await queryInterface.dropTable("gauths");
+    await queryInterface.dropTable('gauths');
   },
 };
