@@ -6,9 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon -r dotenv/config server.js dotenv_config_path=.env",
-    "build": "npm && npm run sequelize db:migrate",
-    "db-migrate": "npm && npm run sequelize db:migrate",
-    "vercel-build": "npm && npm run sequelize db:migrate"
+    "build": "npm run sequelize db:migrate",
+    "db-migrate": "npm run sequelize db:migrate",
+    "vercel-build": "npm run sequelize db:migrate"
   },
   "author": "",
   "license": "ISC",
