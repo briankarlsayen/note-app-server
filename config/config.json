@@ -9,6 +9,6 @@
   "test": {},
   "production": {
     "dialect": "postgres",
-    "url": "postgres://jgmjbmav:amIuUGqWhlBuchoLmbG4AHn4d6qq5EoU@rosie.db.elephantsql.com/jgmjbmav"
+    "use_env_variable": "DATABASE_URL"
   }
 }
