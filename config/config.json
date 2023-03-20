@@ -6,9 +6,5 @@
     "host": "127.0.0.1",
     "dialect": "postgres"
   },
-  "test": {},
-  "production": {
-    "dialect": "postgres",
-    "url": "postgres://jgmjbmav:amIuUGqWhlBuchoLmbG4AHn4d6qq5EoU@rosie.db.elephantsql.com/jgmjbmav"
-  }
+  "test": {}
 }
