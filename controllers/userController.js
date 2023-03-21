@@ -5,6 +5,7 @@ const { Op } = require('sequelize');
 const { sendEmail } = require('../utilities/sendEmail');
 const { issueJWT } = require('../middlewares/auth');
 const decodeToken = require('jwt-decode');
+const { encrypt } = require('../utilities/encryption');
 
 const validatePassword = async (password, dbPassword) => {
   return bcrypt.compare(password, dbPassword);
@@ -13,6 +14,9 @@ const validatePassword = async (password, dbPassword) => {
 exports.register = async (req, res, next) => {
   const { name, email, mobileNo, password } = req.body;
   try {
+    const encryptedText = encrypt(name);
+    console.log('encrypting', encryptedText);
+    return res.status(200).json('taguro');
     console.log('registering...');
     const emailExist = await User.findOne({
       where: { email, isDeleted: false },
@@ -63,7 +67,13 @@ exports.getAllUsers = async (req, res, next) => {
 exports.login = async (req, res, next) => {
   const { username, password } = req.body;
   try {
+    // await User.get();
+    // console.log('decUser', decUser);
     const user = await User.findOne({ where: { email: username } });
+    console.log('user', user);
+    user.get();
+    const decUser = await User.findOne({ where: { email: username } });
+
     if (!user)
       return res.status(422).json({ success: false, message: 'Invalid user' });
     if (user.accType === 'gauth')

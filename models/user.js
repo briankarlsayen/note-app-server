@@ -1,5 +1,6 @@
-"use strict";
-const { Model } = require("sequelize");
+'use strict';
+const { Model } = require('sequelize');
+const { encrypt, decrypt } = require('../utilities/encryption');
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     /**
@@ -9,11 +10,17 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate({ Note, Gauth }) {
       // define association here
-      this.hasMany(Note, { foreignKey: "userId", as: "notes" });
-      this.hasOne(Gauth, { foreignKey: "userId", as: "gauth" });
+      this.hasMany(Note, { foreignKey: 'userId', as: 'notes' });
+      this.hasOne(Gauth, { foreignKey: 'userId', as: 'gauth' });
     }
     toJSON() {
-      return { ...this.get(), id: undefined, password: undefined };
+      return {
+        ...this.get(),
+        id: undefined,
+        password: undefined,
+        // name: decrypt(this.name),
+        // email: decrypt(this.email),
+      };
     }
   }
   User.init(
@@ -25,10 +32,34 @@ module.exports = (sequelize, DataTypes) => {
       name: {
         type: DataTypes.STRING,
         allowNull: false,
+        set(value) {
+          this.setDataValue('name', encrypt(value));
+        },
+        get() {
+          return decrypt(this.getDataValue('name'));
+        },
       },
       email: {
         type: DataTypes.STRING,
         allowNull: false,
+        set(value) {
+          this.setDataValue('email', encrypt(value));
+        },
+        get() {
+          console.log('get');
+          const decryptedData = decrypt(this.getDataValue('email'));
+          return decryptedData;
+        },
+      },
+      decryptedEmail: {
+        type: DataTypes.VIRTUAL,
+        get() {
+          console.log('this.email', this.email);
+          return decrypt(this.email);
+        },
+        set(value) {
+          throw new Error('Do not try to set the `decryptedEmail` value!');
+        },
       },
       password: {
         type: DataTypes.STRING,
@@ -48,9 +79,29 @@ module.exports = (sequelize, DataTypes) => {
       },
     },
     {
+      hooks: {
+        // beforeCreate: (user, options) => {
+        //   user.name = encrypt(user.name);
+        //   user.email = encrypt(user.email);
+        // },
+        // beforeCreate: (user, options) => {
+        //   user.name = encrypt(user.name);
+        //   user.email = encrypt(user.email);
+        // },
+        beforeFind: (user, options) => {
+          // console.log('haha');
+          user.where.email = encrypt(user.where.email);
+          console.log('haha', user);
+        },
+      },
+      //   // beforeUpdate: (item, options) => {
+      //   //   console.log('item', encrypt(item.name));
+      //   //   item.name = encrypt(item.name);
+      //   // },
+      // },
       sequelize,
-      tableName: "users",
-      modelName: "User",
+      tableName: 'users',
+      modelName: 'User',
     }
   );
   return User;
