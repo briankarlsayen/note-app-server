@@ -23,9 +23,10 @@ function genKeyPair() {
   const pubKey = Buffer.from(keyPair.publicKey)
     .toString('base64')
     .replace(/(\r\n|\n|\r)/gm, '');
-  const priKey = Buffer.from(keyPair.privateKey)
-    .toString('base64')
-    .replace(/(\r\n|\n|\r)/gm, '');
+  const priKey = Buffer.from(keyPair.privateKey).toString.replace(
+    /(\r\n|\n|\r)/gm,
+    ''
+  );
   let content = `PUB_KEY=${pubKey}\nPRIV_KEY=${priKey}`;
 
   fs.writeFileSync(__dirname + '/env.dev', content); // create .env.dev file, stores private key & pub key

@@ -10,6 +10,8 @@ processes = []
 
 [env]
   PORT = "5632"
+  DATABASE_URL = ""
+  NODE_ENV = "production"
 
 [experimental]
   auto_rollback = true
