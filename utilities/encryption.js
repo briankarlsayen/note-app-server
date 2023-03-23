@@ -34,18 +34,6 @@ const encrypt = (data) => {
     const publicKey = Buffer.from(process.env.PUB_KEY, 'base64').toString(
       'ascii'
     );
-    // const buffer = Buffer.from(data, 'utf8');
-
-    // const result = crypto.publicEncrypt(
-    //   {
-    //     key: publicKey,
-    //     padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
-    //     oaepHash: 'sha256',
-    //   },
-    //   buffer
-    // );
-
-    // return result.toString('base64');
     return cryptoAESencrypt(publicKey, data);
   } catch (err) {
     console.log('Invalid encryption key');
@@ -57,10 +45,41 @@ const encrypt = (data) => {
 const decrypt = (encryptedData) => {
   try {
     if (!encryptedData) return null;
+    return cryptoAESdecrypt(encryptedData);
+  } catch (err) {
+    console.log('Invalid decryption key');
+    return encryptedData;
+  }
+};
+
+const rsaEncryption = (data) => {
+  try {
+    const publicKey = Buffer.from(process.env.PUB_KEY, 'base64').toString(
+      'ascii'
+    );
+    const buffer = Buffer.from(data, 'utf8');
+    const result = crypto.publicEncrypt(
+      {
+        key: publicKey,
+        padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
+        oaepHash: 'sha256',
+      },
+      buffer
+    );
+    return result.toString('base64');
+  } catch (err) {
+    console.log('Invalid encryption key');
+    return data;
+  }
+};
+
+const rsaDecryption = (data) => {
+  try {
+    if (!data) return null;
     const privateKey = Buffer.from(process.env.PRIV_KEY, 'base64').toString(
       'ascii'
     );
-    const buffer = Buffer.from(encryptedData, 'base64');
+    const buffer = Buffer.from(data, 'base64');
     const result = crypto.privateDecrypt(
       {
         key: privateKey,
@@ -69,11 +88,10 @@ const decrypt = (encryptedData) => {
       },
       buffer
     );
-    return cryptoAESdecrypt(encryptedData);
     return result.toString('utf-8');
   } catch (err) {
     console.log('Invalid decryption key');
-    return encryptedData;
+    return data;
   }
 };
 
