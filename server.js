@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 require('dotenv').config();
+const { errorHandler } = require('./middlewares/errorHandler');
 
 const PORT = process.env.PORT || 5632;
 const { sequelize } = require('./models');
@@ -43,15 +44,28 @@ app.get('/', (req, res) => {
   res.json('Routes alive');
 });
 
+app.get('/encrypt', (req, res) => {
+  try {
+  } catch (err) {}
+});
+
+app.get('/decrypt', (req, res) => {
+  try {
+  } catch (err) {}
+  res.json('Routes alive');
+});
+
 app.get('/protected', protect, (req, res) => {
   return res.status(200).json(req.jwt);
 });
 
 app.use('/notes', protect, noteRoutes);
-app.use('/items', itemRoutes);
-// app.use("/items", protect, itemRoutes);
+app.use('/items', protect, itemRoutes);
 app.use('/previews', protect, previewRoutes);
 app.use('/users', userRoutes);
+
+// * error handling middleware
+app.use(errorHandler);
 
 app.listen(PORT, '0.0.0.0', async () => {
   console.log(`Listening to port ${PORT}`);

@@ -15,28 +15,6 @@ module.exports = {
           },
           { transaction: t }
         ),
-        queryInterface.removeColumn('users', 'name', {
-          transaction: t,
-        }),
-        queryInterface.addColumn(
-          'users',
-          'name',
-          {
-            type: Sequelize.DataTypes.STRING('999'),
-          },
-          { transaction: t }
-        ),
-        queryInterface.removeColumn('users', 'email', {
-          transaction: t,
-        }),
-        queryInterface.addColumn(
-          'users',
-          'email',
-          {
-            type: Sequelize.DataTypes.STRING('999'),
-          },
-          { transaction: t }
-        ),
         queryInterface.removeColumn('notes', 'title', {
           transaction: t,
         }),
@@ -53,17 +31,7 @@ module.exports = {
   },
   down: (queryInterface, Sequelize) => {
     return queryInterface.sequelize.transaction((t) => {
-      return Promise.all([
-        // queryInterface.removeColumn('items', 'title', {
-        //   transaction: t,
-        // }),
-        // queryInterface.removeColumn('users', 'name', {
-        //   transaction: t,
-        // }),
-        // queryInterface.removeColumn('users', 'email', {
-        //   transaction: t,
-        // }),
-      ]);
+      return Promise.all([]);
     });
   },
 };

@@ -18,8 +18,6 @@ module.exports = (sequelize, DataTypes) => {
         ...this.get(),
         id: undefined,
         password: undefined,
-        // name: decrypt(this.name),
-        // email: decrypt(this.email),
       };
     }
   }
@@ -32,34 +30,10 @@ module.exports = (sequelize, DataTypes) => {
       name: {
         type: DataTypes.STRING,
         allowNull: false,
-        set(value) {
-          this.setDataValue('name', encrypt(value));
-        },
-        get() {
-          return decrypt(this.getDataValue('name'));
-        },
       },
       email: {
         type: DataTypes.STRING,
         allowNull: false,
-        set(value) {
-          this.setDataValue('email', encrypt(value));
-        },
-        get() {
-          console.log('get');
-          const decryptedData = decrypt(this.getDataValue('email'));
-          return decryptedData;
-        },
-      },
-      decryptedEmail: {
-        type: DataTypes.VIRTUAL,
-        get() {
-          console.log('this.email', this.email);
-          return decrypt(this.email);
-        },
-        set(value) {
-          throw new Error('Do not try to set the `decryptedEmail` value!');
-        },
       },
       password: {
         type: DataTypes.STRING,
@@ -88,17 +62,12 @@ module.exports = (sequelize, DataTypes) => {
         //   user.name = encrypt(user.name);
         //   user.email = encrypt(user.email);
         // },
-        beforeFind: (user, options) => {
-          // console.log('haha');
-          user.where.email = encrypt(user.where.email);
-          console.log('haha', user);
-        },
+        // beforeFind: (user, options) => {
+        //   // console.log('haha');
+        //   user.where.email = encrypt(user.where.email);
+        //   console.log('haha', user);
+        // },
       },
-      //   // beforeUpdate: (item, options) => {
-      //   //   console.log('item', encrypt(item.name));
-      //   //   item.name = encrypt(item.name);
-      //   // },
-      // },
       sequelize,
       tableName: 'users',
       modelName: 'User',

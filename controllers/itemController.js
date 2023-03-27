@@ -4,7 +4,6 @@ const { createSnapshot } = require('../utilities/snapshot');
 const fs = require('fs');
 const path = require('path');
 const mime = require('mime');
-const { encrypt, decrypt } = require('../utilities/encryption');
 
 const repositionItem = async ({ refUuid }) => {
   const refNote = refUuid
@@ -202,41 +201,6 @@ exports.updateItemPosition = async (req, res, next) => {
     res
       .status(201)
       .json({ success: true, message: 'Successfully update', data: item });
-  } catch (error) {
-    return res.status(422).json({ success: false, message: 'error: ', error });
-  }
-};
-
-exports.encryptItem = async (req, res, next) => {
-  const { title } = req.body;
-  try {
-    const encryptData = encrypt(title);
-
-    const item = await Item.create({ title: encryptData });
-
-    res.status(201).json({
-      success: true,
-      message: 'Successfully update',
-      data: encryptData,
-    });
-  } catch (error) {
-    return res.status(422).json({ success: false, message: 'error: ', error });
-  }
-};
-
-exports.decryptItem = async (req, res, next) => {
-  const { title } = req.body;
-  try {
-    const data = decrypt(title);
-    console.log('haha', title);
-
-    // const item = await Item.create({ title });
-
-    res.status(201).json({
-      success: true,
-      message: 'Successfully update',
-      data,
-    });
   } catch (error) {
     return res.status(422).json({ success: false, message: 'error: ', error });
   }

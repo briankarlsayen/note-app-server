@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
       this.belongsTo(User, { foreignKey: 'userId', as: 'user' });
     }
     toJSON() {
-      return { ...this.get(), id: undefined, title: decrypt(this.title) };
+      return { ...this.get(), id: undefined };
     }
   }
   Note.init(
@@ -30,6 +30,12 @@ module.exports = (sequelize, DataTypes) => {
       title: {
         type: DataTypes.STRING,
         allowNull: false,
+        set(value) {
+          this.setDataValue('title', encrypt({ data: value }));
+        },
+        get() {
+          return decrypt({ data: this.getDataValue('title') });
+        },
       },
       description: {
         type: DataTypes.STRING,
@@ -45,15 +51,6 @@ module.exports = (sequelize, DataTypes) => {
       },
     },
     {
-      hooks: {
-        beforeCreate: (item, options) => {
-          item.title = encrypt(item.title);
-        },
-        beforeUpdate: (item, options) => {
-          console.log('item', encrypt(item.title));
-          item.title = encrypt(item.title);
-        },
-      },
       sequelize,
       tableName: 'notes',
       modelName: 'Note',

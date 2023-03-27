@@ -16,8 +16,8 @@ exports.register = async (req, res, next) => {
   try {
     const encryptedText = encrypt(name);
     console.log('encrypting', encryptedText);
-    return res.status(200).json('taguro');
-    console.log('registering...');
+    // return res.status(200).json('taguro');
+    // console.log('registering...');
     const emailExist = await User.findOne({
       where: { email, isDeleted: false },
     });
@@ -70,12 +70,13 @@ exports.login = async (req, res, next) => {
     // await User.get();
     // console.log('decUser', decUser);
     const user = await User.findOne({ where: { email: username } });
-    console.log('user', user);
-    user.get();
-    const decUser = await User.findOne({ where: { email: username } });
+    // console.log('user', user);
+    // user.get();
+    // const decUser = await User.findOne({ where: { email: username } });
 
     if (!user)
       return res.status(422).json({ success: false, message: 'Invalid user' });
+    console.log('user', user);
     if (user.accType === 'gauth')
       return res
         .status(422)
