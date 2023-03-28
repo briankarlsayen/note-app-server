@@ -12,6 +12,16 @@ processes = []
   PORT = "5632"
   DATABASE_URL = ""
   NODE_ENV = "production"
+  EMAIL_HOST = ""
+  EMAIL_PASSWORD = ""
+  EMAIL_USERNAME = ""
+  NODE_ENV = "production"
+  PRIV_KEY = ""
+  PUB_KEY = ""
+  SECRET_SESSION = ""
+  CLOUD_NAME=""
+  CLOUD_KEY=""
+  CLOUD_SECRET=""
 
 [experimental]
   auto_rollback = true
