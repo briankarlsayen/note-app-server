@@ -6,6 +6,7 @@ const { sendEmail } = require('../utilities/sendEmail');
 const { issueJWT } = require('../middlewares/auth');
 const decodeToken = require('jwt-decode');
 const { encrypt } = require('../utilities/encryption');
+const { uploadSingleImage } = require('../utilities/uploadImg');
 
 const validatePassword = async (password, dbPassword) => {
   return bcrypt.compare(password, dbPassword);
@@ -97,24 +98,42 @@ exports.login = async (req, res, next) => {
   }
 };
 
+const getUserImageName = (imageURL) => {
+  const filename = imageURL.split('/').pop();
+  if (filename.endsWith('.jpg')) {
+    return filename.replace(/\.[^/.]+$/, '');
+  } else {
+    return null;
+  }
+};
+
 exports.updateUser = async (req, res, next) => {
-  const { name, email, mobileNo } = req.body;
+  const { name, email, image } = req.body;
   const uuid = req.jwt.sub;
   try {
-    const emailExist = await User.findOne({
-      where: { uuid: { [Op.not]: uuid }, email },
-    });
-    if (emailExist)
-      return res.status(422).json({ message: 'Email already exist' });
+    if (email) {
+      const emailExist = await User.findOne({
+        where: { uuid: { [Op.not]: uuid }, email },
+      });
+
+      if (emailExist)
+        return res.status(422).json({ message: 'Email already exist' });
+    }
 
     const user = await User.findOne({ where: { uuid } });
     if (!user)
       return res
         .status(422)
         .json({ success: false, message: 'Unable to find user' });
-    user.name = name;
-    user.email = email;
-    user.mobileNo = mobileNo;
+
+    let cloudinaryImg;
+    if (image) {
+      const userImgPubId = user.image ?? getUserImageName(user.image);
+      cloudinaryImg = await uploadSingleImage(image, userImgPubId);
+    }
+    user.name = name ?? user.name;
+    user.email = email ?? user.email;
+    user.image = cloudinaryImg ?? user.image;
     user.save();
     res.status(201).json(user);
   } catch (error) {
