@@ -128,7 +128,7 @@ exports.updateUser = async (req, res, next) => {
 
     let cloudinaryImg;
     if (image) {
-      const userImgPubId = user.image ?? getUserImageName(user.image);
+      const userImgPubId = user.image ? getUserImageName(user.image) : null;
       cloudinaryImg = await uploadSingleImage(image, userImgPubId);
     }
     user.name = name ?? user.name;
