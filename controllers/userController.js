@@ -77,7 +77,6 @@ exports.login = async (req, res, next) => {
 
     if (!user)
       return res.status(422).json({ success: false, message: 'Invalid user' });
-    console.log('user', user);
     if (user.accType === 'gauth')
       return res
         .status(422)
@@ -131,11 +130,13 @@ exports.updateUser = async (req, res, next) => {
       const userImgPubId = user.image ? getUserImageName(user.image) : null;
       cloudinaryImg = await uploadSingleImage(image, userImgPubId);
     }
-    user.name = name ?? user.name;
-    user.email = email ?? user.email;
-    user.image = cloudinaryImg ?? user.image;
-    user.save();
-    res.status(201).json(user);
+
+    const [_rowsUpdate, [updatedBook]] = await User.update(
+      { name, email, image: cloudinaryImg ?? image },
+      { returning: true, where: { uuid } }
+    );
+
+    res.status(201).json(updatedBook);
   } catch (error) {
     return res.status(422).json({ success: false, message: 'error: ', error });
   }
@@ -244,10 +245,7 @@ exports.googleSignIn = async (req, res, next) => {
       where: { accId: decode.sub },
       include: 'user',
     });
-
-    // console.log("henlo", accountExist);
     let userData;
-
     if (!accountExist) {
       const user = await User.create({
         name: decode.name,
@@ -268,12 +266,9 @@ exports.googleSignIn = async (req, res, next) => {
       userData = userJson;
     } else {
       const accountJson = accountExist.toJSON();
-      console.log('accountJson', accountJson);
       userData = accountJson.user;
     }
-    console.log('userData');
     const tokenObject = issueJWT(userData);
-    console.log('token');
     return res.status(200).json({
       success: true,
       token: tokenObject.token,
