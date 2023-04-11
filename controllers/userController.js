@@ -106,6 +106,7 @@ const getUserImageName = (imageURL) => {
   }
 };
 
+// TODO calculate for default user image name
 exports.updateUser = async (req, res, next) => {
   const { name, email, image } = req.body;
   const uuid = req.jwt.sub;

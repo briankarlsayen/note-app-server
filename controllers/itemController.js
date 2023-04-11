@@ -44,6 +44,7 @@ const repositionItem = async ({ refUuid }) => {
   return { success: 1, newId };
 };
 
+// TODO fix this shit
 exports.createItem = async (req, res, next) => {
   const { noteUuid, title, body, type, refUuid } = req.body;
   try {
@@ -73,14 +74,17 @@ exports.createItem = async (req, res, next) => {
             throw err;
           }
           console.log('data', data);
+          const itemTitle = snapshot.pageTitle ? snapshot.pageTitle : title;
+          const itemDescription = snapshot.pageDescription
+            ? snapshot.pageDescription
+            : title;
           const params = {
-            title: snapshot.pageTitle ? snapshot.pageTitle : title,
-            description: snapshot.pageDescription
-              ? snapshot.pageDescription
-              : title,
+            title: itemTitle.substring(0, 255),
+            description: itemDescription.substring(0, 255),
             // type: fileType,
             type: snapshot.pageImage ? 'url' : fileType,
-            image: snapshot.pageImage ? '' : data,
+            image: '',
+            // image: snapshot.pageImage ? '' : data,
             imageUrl: snapshot.pageImage ? snapshot.pageImage : '',
             itemId: item.id,
           };

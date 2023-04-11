@@ -16,20 +16,6 @@ const opts = {
   resource_type: 'auto',
 };
 
-const uploadImage = (image) => {
-  //imgage = > base64
-  return new Promise((resolve, reject) => {
-    cloudinary.uploader.upload(image, opts, (error, result) => {
-      if (result && result.secure_url) {
-        console.log(result.secure_url);
-        return resolve(result.secure_url);
-      }
-      console.log(error.message);
-      return reject({ message: error.message });
-    });
-  });
-};
-
 module.exports.uploadSingleImage = (image, pubId) => {
   //imgage = > base64
   opts.public_id = pubId ?? undefined;
@@ -43,15 +29,6 @@ module.exports.uploadSingleImage = (image, pubId) => {
       console.log(error.message);
       return reject({ message: error.message });
     });
-  });
-};
-
-module.exports.uploadMultipleImages = (images) => {
-  return new Promise((resolve, reject) => {
-    const uploads = images.map((base) => uploadImage(base));
-    Promise.all(uploads)
-      .then((values) => resolve(values))
-      .catch((err) => reject(err));
   });
 };
 
