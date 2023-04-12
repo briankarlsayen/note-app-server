@@ -40,6 +40,7 @@ const itemRoutes = require('./routes/itemRouter');
 const noteRoutes = require('./routes/noteRouter');
 const previewRoutes = require('./routes/previewRouter');
 const userRoutes = require('./routes/userRouter');
+const { hashString } = require('./utilities/tools');
 
 app.get('/', (req, res) => {
   res.json('Routes alive');
@@ -58,6 +59,12 @@ app.get('/decrypt', (req, res) => {
 
 app.get('/protected', protect, (req, res) => {
   return res.status(200).json(req.jwt);
+});
+
+app.get('/hash', protect, (req, res) => {
+  const { string } = req.body;
+  const hash = hashString(string);
+  return res.status(200).json(hash);
 });
 
 app.use('/notes', protect, noteRoutes);

@@ -4,6 +4,8 @@ const { createSnapshot } = require('../utilities/snapshot');
 const fs = require('fs');
 const path = require('path');
 const mime = require('mime');
+const { deleteImage } = require('../utilities/uploadImg');
+const { isURL } = require('../utilities/tools');
 
 const repositionItem = async ({ refUuid }) => {
   const refNote = refUuid
@@ -64,39 +66,61 @@ exports.createItem = async (req, res, next) => {
     });
     if (type === 'Bookmark') {
       const snapshot = await createSnapshot({ url: title });
-      console.log('snapshot', snapshot);
       if (snapshot && snapshot.success) {
-        const imgPath = './uploads/example.png';
-        const fileType = mime.getType(imgPath);
-        const fileName = path.parse(imgPath).name;
-        fs.readFile(imgPath, async (err, data) => {
-          if (err) {
-            throw err;
-          }
-          console.log('data', data);
-          const itemTitle = snapshot.pageTitle ? snapshot.pageTitle : title;
-          const itemDescription = snapshot.pageDescription
-            ? snapshot.pageDescription
-            : title;
-          const params = {
-            title: itemTitle.substring(0, 255),
-            description: itemDescription.substring(0, 255),
-            // type: fileType,
-            type: snapshot.pageImage ? 'url' : fileType,
-            image: '',
-            // image: snapshot.pageImage ? '' : data,
-            imageUrl: snapshot.pageImage ? snapshot.pageImage : '',
-            itemId: item.id,
-          };
-          const preview = await Preview.create(params);
-          return res.status(201).json({
-            success: true,
-            message: 'Successfully created',
-            item: {
-              ...item.dataValues,
-              preview,
-            },
-          });
+        // * save snapshot img on db as Buffer
+        // const imgPath = './uploads/example.png';
+        // const fileType = mime.getType(imgPath);
+        // const fileName = path.parse(imgPath).name;
+        // fs.readFile(imgPath, async (err, data) => {
+        //   if (err) {
+        //     throw err;
+        //   }
+        //   console.log('data', data);
+        //   const itemTitle = snapshot.pageTitle ? snapshot.pageTitle : title;
+        //   const itemDescription = snapshot.pageDescription
+        //     ? snapshot.pageDescription
+        //     : title;
+        //   const params = {
+        //     title: itemTitle.substring(0, 255),
+        //     description: itemDescription.substring(0, 255),
+        //     // type: fileType,
+        //     type: snapshot.pageImage ? 'url' : fileType,
+        //     image: '',
+        //     // image: snapshot.pageImage ? '' : data,
+        //     imageUrl: snapshot.pageImage ? snapshot.pageImage : '',
+        //     itemId: item.id,
+        //   };
+        //   const preview = await Preview.create(params);
+        //   return res.status(201).json({
+        //     success: true,
+        //     message: 'Successfully created',
+        //     item: {
+        //       ...item.dataValues,
+        //       preview,
+        //     },
+        //   });
+        // });
+        // * save snapshot on cloud storage
+        const itemDescription = snapshot.pageDescription
+          ? snapshot.pageDescription
+          : title;
+        const itemTitle = snapshot.pageTitle ? snapshot.pageTitle : title;
+        const params = {
+          title: itemTitle.substring(0, 255),
+          description: itemDescription.substring(0, 255),
+          type: 'url',
+          image: '',
+          imageUrl: snapshot.pageImage,
+          itemId: item.id,
+        };
+        const preview = await Preview.create(params);
+        return res.status(201).json({
+          success: true,
+          message: 'Successfully created',
+          item: {
+            ...item.dataValues,
+            preview,
+          },
         });
       } else {
         return res
@@ -175,12 +199,38 @@ exports.updateCheck = async (req, res, next) => {
     return res.status(422).json({ success: false, message: 'error: ', error });
   }
 };
+
+const checkCloudinaryImg = async (imgUrl) => {
+  if (!isURL(imgUrl)) return null;
+  const urlSplit = imgUrl.split('/');
+  const idx = urlSplit.findIndex((el) => el === 'res.cloudinary.com');
+  if (idx === -1) return null;
+  const id = urlSplit.pop().split('.').slice(0, -1).join('.');
+  return id;
+};
+
 exports.archiveItem = async (req, res, next) => {
   const uuid = req.params.uuid;
   try {
-    const item = await Item.findOne({ where: { uuid } });
-    item.isDeleted = true;
-    item.save();
+    const item = await Item.findOne({
+      where: { uuid },
+      include: 'preview',
+      raw: true,
+      nest: true,
+    });
+    await Item.update(
+      { isDeleted: true },
+      {
+        where: { uuid },
+      }
+    );
+
+    if (item.type === 'Bookmark') {
+      const img = item?.preview?.imageUrl;
+      const id = await checkCloudinaryImg(img);
+      if (id) await deleteImage(id);
+      console.log('Image successfully deleted');
+    }
     res
       .status(201)
       .json({ success: true, message: 'Item successfully deleted', item });

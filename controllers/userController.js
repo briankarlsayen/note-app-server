@@ -7,6 +7,7 @@ const { issueJWT } = require('../middlewares/auth');
 const decodeToken = require('jwt-decode');
 const { encrypt } = require('../utilities/encryption');
 const { uploadSingleImage } = require('../utilities/uploadImg');
+const { hashString } = require('../utilities/tools');
 
 const validatePassword = async (password, dbPassword) => {
   return bcrypt.compare(password, dbPassword);
@@ -106,7 +107,6 @@ const getUserImageName = (imageURL) => {
   }
 };
 
-// TODO calculate for default user image name
 exports.updateUser = async (req, res, next) => {
   const { name, email, image } = req.body;
   const uuid = req.jwt.sub;
@@ -128,7 +128,7 @@ exports.updateUser = async (req, res, next) => {
 
     let cloudinaryImg;
     if (image) {
-      const userImgPubId = user.image ? getUserImageName(user.image) : null;
+      const userImgPubId = hashString(uuid);
       cloudinaryImg = await uploadSingleImage(image, userImgPubId);
     }
 

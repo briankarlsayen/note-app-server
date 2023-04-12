@@ -32,16 +32,31 @@ module.exports.uploadSingleImage = (image, pubId) => {
   });
 };
 
-module.exports.deleteImage = (image) => {
-  //imgage = > base64
+module.exports.uploadStream = async (imgStream) => {
   return new Promise((resolve, reject) => {
-    cloudinary.uploader.destroy(image, (error, result) => {
-      if (result && result.secure_url) {
-        console.log(result.secure_url);
-        return resolve(result.secure_url);
+    cloudinary.uploader
+      .upload_stream({ format: 'jpeg' }, (error, result) => {
+        if (error) {
+          console.log(err);
+          return reject({ message: error.message });
+        } else {
+          console.log(`Upload succeed: ${result}`);
+          return resolve(result.secure_url);
+          // filteredBody.photo = result.url;
+        }
+      })
+      .end(imgStream);
+  });
+};
+
+module.exports.deleteImage = (imagePubId) => {
+  return new Promise((resolve, reject) => {
+    cloudinary.uploader.destroy(imagePubId, (error, result) => {
+      if (result && result.result === 'ok') {
+        return resolve(result.result);
       }
-      console.log(error.message);
-      return reject({ message: error.message });
+      console.log('err', error?.message);
+      return reject({ message: error?.message ?? 'Unable to delete image' });
     });
   });
 };
