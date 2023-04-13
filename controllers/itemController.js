@@ -113,14 +113,15 @@ exports.createItem = async (req, res, next) => {
           imageUrl: snapshot.pageImage,
           itemId: item.id,
         };
-        const preview = await Preview.create(params);
+        await Preview.create(params);
+        const newItem = await Item.findOne({
+          where: { uuid: item.uuid },
+          include: 'preview',
+        });
         return res.status(201).json({
           success: true,
           message: 'Successfully created',
-          item: {
-            ...item.dataValues,
-            preview,
-          },
+          item: newItem,
         });
       } else {
         return res
