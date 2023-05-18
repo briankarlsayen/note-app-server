@@ -1,4 +1,3 @@
-const puppeteer = require('puppeteer');
 const { uploadStream } = require('./uploadImg');
 const { isURL, limitStringLen } = require('./tools');
 const axios = require('axios');
