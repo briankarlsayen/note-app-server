@@ -1,79 +1,50 @@
 const puppeteer = require('puppeteer');
 const { uploadStream } = require('./uploadImg');
 const { isURL, limitStringLen } = require('./tools');
+const axios = require('axios');
 
 // * echancements
 /*
   [ ] - set other opts for searching header title, description and image
 */
+
 exports.createSnapshot = async ({ url }) => {
   try {
-    const browser = await puppeteer.launch({
-      headless: true,
-      defaultViewport: null,
-      args: ['--incognito', '--no-sandbox', '--single-process', '--no-zygote'],
-    });
-    const page = await browser.newPage();
-    await page.goto(url, { waitUntil: 'domcontentloaded' });
-    try {
-      let [pageDescription, pageTitle, pageImage] = await page.evaluate(
-        async () => {
-          const titleNode = document.head
-            ?.querySelector('meta[property="og:title"]')
-            ?.getAttribute('content');
-
-          const imgNode = document.head
-            ?.querySelector('meta[property="og:image"]')
-            ?.getAttribute('content');
-
-          const descNode = document.head
-            ?.querySelector('meta[property="og:description"]')
-            ?.getAttribute('content');
-          return [descNode, titleNode, imgNode];
-        }
-      );
-
-      let snapshotImg;
-      // * create a snapshot image then save it on cloud storage
-      const checkIsValidImg = isURL(pageImage);
-      if (!checkIsValidImg) {
-        const imageBuffer = await page.screenshot({
-          type: 'jpeg',
-          quality: 100,
-          clip: {
-            x: 0,
-            y: 0,
-            width: 640,
-            height: 360,
-          },
-          omitBackground: true,
-        });
-        snapshotImg = await uploadStream(imageBuffer);
-      }
-
-      const pageInfo = {
-        pageTitle: limitStringLen(pageTitle),
-        pageDescription: limitStringLen(pageDescription),
-        pageImage: checkIsValidImg ? pageImage : snapshotImg,
-      };
-
-      await browser.close();
-      return { success: true, ...pageInfo };
-    } catch (error) {
-      await browser.close();
-      const pageInfo = {
-        pageTitle: null,
-        pageDescription: null,
-        pageImage: null,
-      };
-      console.log('err1');
-      return { success: true, ...pageInfo };
-    }
-  } catch (error) {
-    console.log('err2');
-    return {
-      success: false,
-      message: 'Screenshot failed',
+    const BASE_URL =
+      'https://pw-web-scrape-git-master-briankarlsayen.vercel.app/screenshot';
+    const params = {
+      url,
+      width: 640,
+      height: 360,
     };
+
+    const response = await axios.post(BASE_URL, params);
+    if (!response.data) throw new Error();
+    const responseData = response?.data;
+    const pageTitle = responseData.title ?? null;
+    const pageDescription = responseData.description ?? null;
+
+    let snapshotImg;
+    // * create a snapshot image then save it on cloud storage
+    if (responseData.isScreenshot) {
+      const imageBuffer = responseData.image;
+      snapshotImg = await uploadStream(imageBuffer);
+    }
+
+    const pageInfo = {
+      pageTitle: limitStringLen(pageTitle),
+      pageDescription: limitStringLen(pageDescription),
+      pageImage: responseData?.isScreenshot ? snapshotImg : responseData?.image,
+    };
+
+    return { success: true, ...pageInfo };
+  } catch (error) {
+    const pageInfo = {
+      pageTitle: null,
+      pageDescription: null,
+      pageImage: null,
+    };
+    console.log('err1', error);
+    return { success: true, ...pageInfo };
   }
 };

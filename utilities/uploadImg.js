@@ -35,9 +35,9 @@ module.exports.uploadSingleImage = (image, pubId) => {
 module.exports.uploadStream = async (imgStream) => {
   return new Promise((resolve, reject) => {
     cloudinary.uploader
-      .upload_stream({ format: 'jpeg' }, (error, result) => {
+      .upload_stream({ format: 'png' }, (error, result) => {
         if (error) {
-          console.log(err);
+          console.log(error);
           return reject({ message: error.message });
         } else {
           console.log(`Upload succeed: ${result}`);
