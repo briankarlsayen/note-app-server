@@ -113,6 +113,8 @@ exports.createItem = async (req, res, next) => {
           imageUrl: snapshot.pageImage,
           itemId: item.id,
         };
+
+        console.log('prev params', params);
         await Preview.create(params);
         const newItem = await Item.findOne({
           where: { uuid: item.uuid },
@@ -125,7 +127,7 @@ exports.createItem = async (req, res, next) => {
         });
       } else {
         return res
-          .status(201)
+          .status(422)
           .json({ success: false, message: 'Unable to create snapshot', item });
       }
     } else if (type === 'Text') {

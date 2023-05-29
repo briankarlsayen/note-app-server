@@ -17,7 +17,10 @@ exports.createSnapshot = async ({ url }) => {
       height: 360,
     };
 
+    console.log('url', url);
+
     const response = await axios.post(BASE_URL, params);
+    console.log('response', response);
     if (!response.data) throw new Error();
     const responseData = response?.data;
     const pageTitle = responseData.title ?? null;
@@ -43,7 +46,7 @@ exports.createSnapshot = async ({ url }) => {
       pageDescription: null,
       pageImage: null,
     };
-    console.log('err1', error);
+    console.log('err1', error.message);
     return { success: true, ...pageInfo };
   }
 };

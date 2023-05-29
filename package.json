@@ -8,7 +8,8 @@
     "dev": "nodemon -r dotenv/config server.js dotenv_config_path=.env",
     "build": "npx sequelize-cli db:migrate --env production",
     "db-migrate": "./node_modules/.bin/sequelize sequelize db:migrate",
-    "start": "node server.js"
+    "start": "node server.js",
+    "db-migrate:undo": "./node_modules/.bin/sequelize sequelize db:migrate:undo:all"
   },
   "author": "",
   "license": "ISC",

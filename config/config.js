@@ -12,7 +12,6 @@ module.exports = {
   test: {},
   production: {
     dialect: 'postgres',
-    url: '',
-    // url: process.env.DATABASE_URL,
+    url: '', // postres url
   },
 };
