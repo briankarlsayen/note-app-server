@@ -14,7 +14,7 @@ module.exports = {
   test: {},
   production: {
     dialect: "postgres",
-    url: "postgresql://postgres:TFpVAwniOgaGalfVWimVhWqhnOJzGaFI@roundhouse.proxy.rlwy.net:43506/railway", // postres url
+    url: process.env.DB_URL, // postres url
     dialectModule: pg,
   },
 };
